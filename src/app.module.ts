@@ -8,6 +8,7 @@ import { TokenModule } from './token/token.module';
 import { UserModule } from './user/user.module';
 import { RolesModule } from './roles/roles.module';
 import { S3Module } from './s3/s3.module';
+import { HallModule } from './hall/hall.module';
 
 @Module({
   imports: [
@@ -24,7 +25,8 @@ import { S3Module } from './s3/s3.module';
     TokenModule,
     UserModule,
     RolesModule,
-    S3Module
+    S3Module,
+    HallModule
   ],
   controllers: [AppController],
   providers: [AppService],
