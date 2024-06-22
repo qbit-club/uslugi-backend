@@ -10,7 +10,7 @@ export class HallClass {
     required: true,
     min: 2
   })
-  name: string
+  title: string
 }
 
 export const HallSchema = SchemaFactory.createForClass(HallClass)
