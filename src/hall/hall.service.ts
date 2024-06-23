@@ -12,7 +12,7 @@ export class HallService {
   constructor(
     @InjectModel('Hall') private HallModel: Model<HallClass>,
   ) {}
-  create(hall: HallFromClient): Promise<any> {
+  create(hall: HallFromClient): Promise<any> {    
     return this.HallModel.create(hall)
   }
 }
