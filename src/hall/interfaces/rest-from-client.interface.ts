@@ -1,6 +1,6 @@
 import type { Table } from "./table.interface";
 
-export interface HallFromClient {
+export interface RestFromClient {
   title: string,
   tables: Table[]
 }

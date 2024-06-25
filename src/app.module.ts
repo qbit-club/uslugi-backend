@@ -8,7 +8,7 @@ import { TokenModule } from './token/token.module';
 import { UserModule } from './user/user.module';
 import { RolesModule } from './roles/roles.module';
 import { S3Module } from './s3/s3.module';
-import { HallModule } from './hall/hall.module';
+import { RestModule } from './hall/rest.module';
 
 @Module({
   imports: [
@@ -26,7 +26,7 @@ import { HallModule } from './hall/hall.module';
     UserModule,
     RolesModule,
     S3Module,
-    HallModule
+    RestModule
   ],
   controllers: [AppController],
   providers: [AppService],

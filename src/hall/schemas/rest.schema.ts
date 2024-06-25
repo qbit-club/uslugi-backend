@@ -2,10 +2,10 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { HydratedDocument } from 'mongoose';
 import type { Table } from '../interfaces/table.interface';
 
-export type HallDocument = HydratedDocument<HallClass>
+export type RestDocument = HydratedDocument<RestClass>
 
 @Schema()
-export class HallClass {
+export class RestClass {
   @Prop({ 
     type: String, 
     required: true,
@@ -20,4 +20,4 @@ export class HallClass {
   tables: Table[]
 }
 
-export const HallSchema = SchemaFactory.createForClass(HallClass)
+export const RestSchema = SchemaFactory.createForClass(RestClass)
