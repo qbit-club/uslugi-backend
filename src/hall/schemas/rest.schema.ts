@@ -9,9 +9,18 @@ export class RestClass {
   @Prop({ 
     type: String, 
     required: true,
-    min: 2
+    min: 4,
+    max: 32
   })
   title: string
+  
+  @Prop({ 
+    type: String, 
+    required: true,
+    min: 4,
+    max: 32
+  })
+  alias: string
 
   @Prop({
     type: Array,
