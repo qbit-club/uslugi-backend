@@ -1,5 +1,6 @@
 // core imports
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
 
 // interfaces
 import { RestFromClient } from './interfaces/rest-from-client.interface';
@@ -23,8 +24,40 @@ export class RestController {
     return await this.RestModel.create(rest)
   }
 
-  @Get('/all')
+  @Get('all')
   async getAll() {
     return await this.RestModel.find({})
+  }
+  @Post('images')
+  @UseInterceptors(AnyFilesInterceptor())
+  async uploadFile(
+    @UploadedFiles() files: Array<Express.Multer.File>,
+    @Query('rest_id') restId: String,
+  ) {
+    // const s3 = new EasyYandexS3({
+    //   auth: {
+    //     accessKeyId: process.env.YC_KEY_ID,
+    //     secretAccessKey: process.env.YC_SECRET,
+    //   },
+    //   Bucket: process.env.YC_BUCKET_NAME,
+    //   debug: false
+    // })
+    
+    // let filenames = []
+    // let buffers = []
+    
+    // for (let file of files) {
+    //   buffers.push({ buffer: file.buffer, name: file.originalname, });    // Буфер загруженного файла
+    // }
+    
+    // if (buffers.length) {
+    //   let uploadResult = await s3.Upload(buffers, '/restik/');
+      
+    //   for (let upl of uploadResult) {
+    //     filenames.push(upl.Location)
+    //   }
+    // }
+    
+    return await this.RestModel.findByIdAndUpdate(restId, { $set: { images: filenames } })
   }
 }

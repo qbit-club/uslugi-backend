@@ -6,21 +6,33 @@ export type RestDocument = HydratedDocument<RestClass>
 
 @Schema()
 export class RestClass {
-  @Prop({ 
-    type: String, 
+  @Prop({
+    type: String,
     required: true,
     min: 4,
     max: 32
   })
   title: string
-  
-  @Prop({ 
-    type: String, 
+
+  @Prop({
+    type: String,
     required: true,
     min: 4,
     max: 32
   })
   alias: string
+
+  @Prop({
+    type: String,
+    required: true,
+  })
+  phone: string
+
+  @Prop({
+    type: String,
+    required: true,
+  })
+  socialMedia: string
 
   @Prop({
     type: Array,
