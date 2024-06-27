@@ -36,6 +36,12 @@ export class RestClass {
 
   @Prop({
     type: Array,
+    required: false,
+  })
+  images: String[]
+
+  @Prop({
+    type: Array,
     required: true
   })
   tables: Table[]

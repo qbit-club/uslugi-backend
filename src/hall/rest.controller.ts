@@ -12,6 +12,7 @@ import { RestService } from './rest.service';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { RestClass } from './schemas/rest.schema';
+import YaCloud from 'src/s3/bucket';
 
 @Controller('rest')
 export class RestController {
@@ -34,29 +35,12 @@ export class RestController {
     @UploadedFiles() files: Array<Express.Multer.File>,
     @Query('rest_id') restId: String,
   ) {
-    // const s3 = new EasyYandexS3({
-    //   auth: {
-    //     accessKeyId: process.env.YC_KEY_ID,
-    //     secretAccessKey: process.env.YC_SECRET,
-    //   },
-    //   Bucket: process.env.YC_BUCKET_NAME,
-    //   debug: false
-    // })
+    let filenames = []
     
-    // let filenames = []
-    // let buffers = []
-    
-    // for (let file of files) {
-    //   buffers.push({ buffer: file.buffer, name: file.originalname, });    // Буфер загруженного файла
-    // }
-    
-    // if (buffers.length) {
-    //   let uploadResult = await s3.Upload(buffers, '/restik/');
-      
-    //   for (let upl of uploadResult) {
-    //     filenames.push(upl.Location)
-    //   }
-    // }
+    for (let file of files) {
+      let uploadResult = await YaCloud.Upload({ file, path: 'restaurants', fileName: file.originalname})
+      filenames.push(uploadResult.Location)
+    };
     
     return await this.RestModel.findByIdAndUpdate(restId, { $set: { images: filenames } })
   }
