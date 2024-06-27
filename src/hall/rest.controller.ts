@@ -29,6 +29,11 @@ export class RestController {
   async getAll() {
     return await this.RestModel.find({})
   }
+  @Post('one-by-alias')
+  async oneByAlias(@Body('alias') alias: string) {
+    return await this.RestModel.find({alias})
+  }
+
   @Post('images')
   @UseInterceptors(AnyFilesInterceptor())
   async uploadFile(
