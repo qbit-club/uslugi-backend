@@ -41,6 +41,12 @@ export class RestClass {
   images: String[]
 
   @Prop({
+    type: Object,
+    required: false,
+  })
+  location: Object
+
+  @Prop({
     type: Array,
     required: true
   })
