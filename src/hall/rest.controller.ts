@@ -31,7 +31,7 @@ export class RestController {
   }
   @Post('one-by-alias')
   async oneByAlias(@Body('alias') alias: string) {
-    return await this.RestModel.find({alias})
+    return await this.RestModel.findOne({alias})
   }
 
   @Post('images')
