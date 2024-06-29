@@ -5,5 +5,7 @@ export interface RestFromClient {
   alias: string,
   phone: string,
   socialMedia: string,
+  schedule: string,
+  description: string,
   tables: Table[]
 }

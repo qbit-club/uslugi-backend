@@ -35,6 +35,19 @@ export class RestClass {
   socialMedia: string
 
   @Prop({
+    type: String,
+    required: true,
+  })
+  description: string
+
+
+  @Prop({
+    type: String,
+    required: true,
+  })
+  schedule: string
+
+  @Prop({
     type: Array,
     required: false,
   })
