@@ -22,7 +22,6 @@ export class RestController {
   ) { }
   @Post()
   async create(@Body('rest') rest: RestFromClient) {
-    console.log(rest)
     return await this.RestModel.create(rest)
   }
 
