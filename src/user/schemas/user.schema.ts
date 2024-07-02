@@ -10,7 +10,7 @@ export class UserClass {
     required: true,
     min: 2
   })
-  fullname: string
+  name: string
 
   @Prop({ 
     type: String, 
@@ -27,7 +27,7 @@ export class UserClass {
   @Prop({
     type: [String], 
     default: [],
-    required: true
+    required: false
   })
   roles: string[]
 }
