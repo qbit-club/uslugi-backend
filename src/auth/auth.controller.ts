@@ -15,7 +15,7 @@ export class AuthController {
 	@HttpCode(HttpStatus.CREATED)
 	@Post('registration')
 	async registration(
-		@Res() res: Response,
+		@Res({ passthrough: true }) res: Response,
 		@Body() user: User
 	) {
 		const userData = await this.AuthService.registration(user)
@@ -37,7 +37,7 @@ export class AuthController {
 	@HttpCode(HttpStatus.OK)
 	@Post('login')
 	async login(
-		@Res() res: Response,
+		@Res({ passthrough: true }) res: Response,
 		@Body('email') email: string,
 		@Body('password') password: string
 	) {
@@ -61,15 +61,15 @@ export class AuthController {
 	@Get('refresh')
 	async refresh(
 		@Req() req: Request,
-		@Res() res: Response,
+		@Res({ passthrough: true }) res: Response,
 	) {
 		const { refreshToken } = req.cookies
-
+		
 		const userData = await this.AuthService.refresh(refreshToken)
 
 		let newRefreshToken = userData.refreshToken
 		delete userData.refreshToken
-
+		
 		res.cookie(
 			'refreshToken',
 			newRefreshToken,
