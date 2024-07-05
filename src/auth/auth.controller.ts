@@ -8,114 +8,114 @@ import { AuthService } from './auth.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(
+	constructor(
 		private AuthService: AuthService
-	) {}
+	) { }
 
 	@HttpCode(HttpStatus.CREATED)
 	@Post('registration')
 	async registration(
-		@Res() res: Response, 
+		@Res() res: Response,
 		@Body() user: User
 	) {
 		const userData = await this.AuthService.registration(user)
 
-    let refreshToken = userData.refreshToken
-    delete userData.refreshToken
+		let refreshToken = userData.refreshToken
+		delete userData.refreshToken
 
 		res.cookie(
-			'refreshToken', 
+			'refreshToken',
 			refreshToken,
-			{ 
-				maxAge: 30 * 24 * 60 * 60 * 1000, 
-				httpOnly: true, 
-				secure: eval(process.env.HTTPS) 
-			}
-		).json(userData)
-	}
-	
-	@HttpCode(HttpStatus.OK)
-	@Post('login')
-	async login(
-		@Res() res: Response, 
-		@Body('email') email: string, 
-    @Body('password') password: string 
-	) {
-		const userData = await this.AuthService.login(email, password)
-
-    let refreshToken = userData.refreshToken
-    delete userData.refreshToken
-
-		res.cookie(
-			'refreshToken', 
-			refreshToken, 
-			{ 
-				maxAge: 30 * 24 * 60 * 60 * 1000, 
-				httpOnly: true, 
-				secure: eval(process.env.HTTPS)
-			}
-		).json(userData)
-	}
-	
-	@HttpCode(HttpStatus.OK)
-	@Get('refresh')
-	async refresh(
-		@Req() req: Request, 
-		@Res() res: Response, 
-	) {
-		const { refreshToken } = req.cookies
-
-		const userData = await this.AuthService.refresh(refreshToken)
-		
-    let newRefreshToken = userData.refreshToken
-    delete userData.refreshToken
-
-    res.cookie(
-			'refreshToken', 
-			newRefreshToken, 
-			{ 
-				maxAge: 30 * 24 * 60 * 60 * 1000, 
+			{
+				maxAge: 30 * 24 * 60 * 60 * 1000,
 				httpOnly: true,
 				secure: eval(process.env.HTTPS)
 			}
 		).json(userData)
 	}
-	
+
+	@HttpCode(HttpStatus.OK)
+	@Post('login')
+	async login(
+		@Res() res: Response,
+		@Body('email') email: string,
+		@Body('password') password: string
+	) {
+		const userData = await this.AuthService.login(email, password)
+
+		let refreshToken = userData.refreshToken
+		delete userData.refreshToken
+
+		res.cookie(
+			'refreshToken',
+			refreshToken,
+			{
+				maxAge: 30 * 24 * 60 * 60 * 1000,
+				httpOnly: true,
+				secure: eval(process.env.HTTPS)
+			}
+		).json(userData)
+	}
+
+	@HttpCode(HttpStatus.OK)
+	@Get('refresh')
+	async refresh(
+		@Req() req: Request,
+		@Res() res: Response,
+	) {
+		const { refreshToken } = req.cookies
+
+		const userData = await this.AuthService.refresh(refreshToken)
+
+		let newRefreshToken = userData.refreshToken
+		delete userData.refreshToken
+
+		res.cookie(
+			'refreshToken',
+			newRefreshToken,
+			{
+				maxAge: 30 * 24 * 60 * 60 * 1000,
+				httpOnly: true,
+				secure: eval(process.env.HTTPS)
+			}
+		).json(userData)
+	}
+
 	@HttpCode(HttpStatus.OK)
 	@Post('logout')
 	async logout(
-		@Req() req: Request, 
-		@Res() res: Response, 
+		@Req() req: Request,
+		@Res() res: Response,
 	) {
 		const { refreshToken } = req.cookies
 
 		await this.AuthService.logout(refreshToken)
 		res.clearCookie('refreshToken').send()
 	}
-	
+
 	@HttpCode(HttpStatus.OK)
-  @Post('reset-password')
-  async resetPassword(
-		@Res() res: Response, 
-		@Body('password') password: string, 
-    @Body('token') token: string, 
-    @Body('user_id') user_id: string
+	@Post('reset-password')
+	async resetPassword(
+		@Res() res: Response,
+		@Body('password') password: string,
+		@Body('token') token: string,
+		@Body('user_id') user_id: string
 	) {
 		const userData = await this.AuthService.resetPassword(password, token, user_id)
 
-    let refreshToken = userData.refreshToken
-    delete userData.refreshToken
+		let refreshToken = userData.refreshToken
+		delete userData.refreshToken
 
 		res.cookie(
-			'refreshToken', 
-			refreshToken, 
-			{ 
-				maxAge: 30 * 24 * 60 * 60 * 1000, 
+			'refreshToken',
+			refreshToken,
+			{
+				maxAge: 30 * 24 * 60 * 60 * 1000,
 				httpOnly: true,
 				secure: eval(process.env.HTTPS)
 			}
 		).json(userData)
-  }	
+	}
 
 	@UseGuards(AuthGuard)
 	@HttpCode(HttpStatus.OK)
@@ -126,13 +126,13 @@ export class AuthController {
 	) {
 		return await this.AuthService.update(new_user, req.user)
 	}
-  
+
 	@HttpCode(HttpStatus.OK)
 	@Post('send-reset-link')
 	async sendResetLink(
 		@Body('email') email: string
 	) {
-		let link = await this.AuthService.sendResetLink(email)	
+		let link = await this.AuthService.sendResetLink(email)
 		return link
-  }
+	}
 }
