@@ -7,5 +7,6 @@ export interface RestFromClient {
   socialMedia: string,
   schedule: string,
   description: string,
+  author: string
   tables: Table[]
 }
