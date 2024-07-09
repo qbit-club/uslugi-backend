@@ -7,22 +7,26 @@ import { RestFromClient } from './interfaces/rest-from-client.interface';
 
 // services
 import { RestService } from './rest.service';
+import YaCloud from 'src/s3/bucket';
 
 // all about MongoDB
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { RestClass } from './schemas/rest.schema';
-import YaCloud from 'src/s3/bucket';
+import { UserClass } from 'src/user/schemas/user.schema';
 
 @Controller('rest')
 export class RestController {
   constructor(
     private RestService: RestService,
     @InjectModel('Rest') private RestModel: Model<RestClass>,
+    @InjectModel('User') private UserModel: Model<UserClass>,
   ) { }
   @Post()
   async create(@Body('rest') rest: RestFromClient) {
-    return await this.RestModel.create(rest)
+    const restCallback = await this.RestModel.create(rest)
+    await this.UserModel.findByIdAndUpdate(restCallback.author, { $push: { rests: restCallback._id } })
+    return restCallback
   }
 
   @Get('all')
@@ -31,7 +35,7 @@ export class RestController {
   }
   @Post('one-by-alias')
   async oneByAlias(@Body('alias') alias: string) {
-    return await this.RestModel.findOne({alias})
+    return await this.RestModel.findOne({ alias })
   }
 
   @Post('images')
@@ -41,12 +45,12 @@ export class RestController {
     @Query('rest_id') restId: String,
   ) {
     let filenames = []
-    
+
     for (let file of files) {
-      let uploadResult = await YaCloud.Upload({ file, path: 'restaurants', fileName: file.originalname})
+      let uploadResult = await YaCloud.Upload({ file, path: 'restaurants', fileName: file.originalname })
       filenames.push(uploadResult.Location)
     };
-    
+
     return await this.RestModel.findByIdAndUpdate(restId, { $set: { images: filenames } })
   }
 }

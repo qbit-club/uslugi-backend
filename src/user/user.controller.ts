@@ -42,4 +42,14 @@ export class UserController {
     
     await subject_user.updateOne(user, { runValidators: true })
   }
+
+  @HttpCode(HttpStatus.OK)
+  @Get('rests')
+  async getUserRests(
+    @Query() query: any
+  ) {    
+    return await this.UserModel.findById(query.userId).populate('rests').select({
+      rests: 1
+    })
+  }
 }
