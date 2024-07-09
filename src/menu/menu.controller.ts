@@ -26,4 +26,8 @@ export class MenuController {
     let menuFromDb = await this.MenuModel.create(menu)
     return await this.RestModel.findByIdAndUpdate(menuFromDb.restId, { $set: { menu: menuFromDb._id } })
   }
+  // @Put('/')
+  // async addMenuItems(@Body()) {
+    
+  // }
 }
