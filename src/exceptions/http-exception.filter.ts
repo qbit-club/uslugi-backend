@@ -9,7 +9,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     const res = ctx.getResponse<Response>()
 
     // if (dev)
-    console.log(exception)
+    // console.log(exception)
 
     if (exception.getStatus() === 500)
       return res.status(500).json({ message: 'Непредвиденная ошибка' })
