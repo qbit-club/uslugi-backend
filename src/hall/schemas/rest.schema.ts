@@ -3,6 +3,7 @@ import { HydratedDocument } from 'mongoose';
 import type { Table } from '../interfaces/table.interface';
 import * as mongoose from 'mongoose';
 import type { User } from 'src/user/interfaces/user.interface';
+import type { Menu } from 'src/menu/interfaces/menu.interface'
 
 export type RestDocument = HydratedDocument<RestClass>
 
@@ -67,6 +68,12 @@ export class RestClass {
     required: true
   })
   author: User
+
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Menu',
+  })
+  menu: Menu
 
   @Prop({
     type: Array,
