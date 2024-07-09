@@ -9,6 +9,7 @@ import { UserModule } from './user/user.module';
 import { RolesModule } from './roles/roles.module';
 import { S3Module } from './s3/s3.module';
 import { RestModule } from './hall/rest.module';
+import { MenuModule } from './menu/menu.module';
 
 @Module({
   imports: [
@@ -26,7 +27,8 @@ import { RestModule } from './hall/rest.module';
     UserModule,
     RolesModule,
     S3Module,
-    RestModule
+    RestModule,
+    MenuModule
   ],
   controllers: [AppController],
   providers: [AppService],
