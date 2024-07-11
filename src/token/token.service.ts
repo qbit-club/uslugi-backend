@@ -9,12 +9,12 @@ import { TokenClass } from './schemas/token.schema';
 
 @Injectable()
 export class TokenService {
-  constructor(
-    @InjectModel('Token') private TokenModel: Model<TokenClass>,
+	constructor(
+		@InjectModel('Token') private TokenModel: Model<TokenClass>,
 		private jwtService: JwtService
-	) {}
+	) { }
 
-  	validateResetToken(token: string, secret: string): User {
+	validateResetToken(token: string, secret: string): User {
 		try {
 			return jwt.verify(token, secret) as User
 		} catch {
@@ -38,6 +38,15 @@ export class TokenService {
 			return { accessToken, refreshToken }
 		} catch {
 			return { accessToken: null, refreshToken: null }
+		}
+	}
+
+	generateAccessToken(payload: any): string {
+		try {
+			const accessToken = jwt.sign(payload, process.env.JWT_ACCESS_SECRET, { expiresIn: '15m' })
+			return accessToken
+		} catch (error) {
+			return null
 		}
 	}
 

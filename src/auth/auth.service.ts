@@ -15,7 +15,7 @@ export class AuthService {
     @InjectModel('User') private UserModel: Model<UserClass>,
     private TokenService: TokenService,
     private RolesService: RolesService
-  ) {}
+  ) { }
 
   async registration(user: User | UserFromClient) {
     const candidate = await this.UserModel.findOne({ email: user.email })
@@ -28,63 +28,83 @@ export class AuthService {
 
     const password = await bcrypt.hash(user.password, 3)
     const created_user = (await this.UserModel.create(Object.assign(user, { password }))).toObject()
- 
+
     const tokens = this.TokenService.generateTokens(created_user)
     await this.TokenService.saveToken(tokens.refreshToken)
-    
+
     return {
       ...tokens,
       user: created_user
-    }  
-  }  
+    }
+  }
 
   async login(email: string, password: string) {
     const user = (await this.UserModel.findOne({ email })).toObject()
-  
+
     if (!user) {
       throw ApiError.BadRequest('Пользователь с таким email не найден')
     }
-  
+
     if (user.password.length < 8)
       throw ApiError.BadRequest('Слишком короткий пароль')
-    
+
     const isPassEquals = await bcrypt.compare(password, user.password)
 
     if (!isPassEquals) {
       throw ApiError.BadRequest('Неверный пароль')
     }
-  
+
     const tokens = this.TokenService.generateTokens(user)
     await this.TokenService.saveToken(tokens.refreshToken)
-  
+
     return {
       ...tokens,
       user
-    }      
-  }  
+    }
+  }
 
-  async refresh(refreshToken: string) {
-    if (!refreshToken)
+  async refresh(refreshToken: string, accessToken: string) {
+    let userData: any; // jwt payload
+    let user: any; // object to return
+    
+    // проверить, валиден ли ещё accessToken
+    userData = this.TokenService.validateAccessToken(accessToken)
+    
+    if (userData != null) {
+      user = (await this.UserModel.findById(userData._id)).toObject()
+      
+      return {
+        refreshToken: refreshToken,
+        accessToken: accessToken,
+        user: user
+      }
+    }
+    // если accessToken не валиден - пройти авторизацию с refreshToken и создать новый accessToken
+
+    // если нет refreshToken выкидываем пользователя
+    if (!refreshToken) {      
       throw ApiError.UnauthorizedError()
+    }
 
-    const userData = this.TokenService.validateRefreshToken(refreshToken)
+    userData = this.TokenService.validateRefreshToken(refreshToken)
     const tokenFromDb = await this.TokenService.findToken(refreshToken)
-
-    if (!userData && !tokenFromDb)
+    // если refreshToken сдох, то выкидываем пользователя
+    if (!userData || !tokenFromDb) {    
       throw ApiError.UnauthorizedError()
+    }
 
-    const user = (await this.UserModel.findById(userData._id)).toObject()
+    user = (await this.UserModel.findById(userData._id)).toObject()
 
-    if (userData.password !== user.password)
+    if (userData.password !== user.password) {      
       throw ApiError.AccessDenied('Аутентификация провалена. Пароль изменен')
+    }
+    // new accessToken, чтобы пользователь мог зайти в
+    // систему ближайшие 15 минут без использоватния refreshToken
+    const newAccessToken = this.TokenService.generateAccessToken(user)
 
-    await this.TokenService.removeToken(refreshToken)
-
-    const tokens = this.TokenService.generateTokens(user)
-    await this.TokenService.saveToken(tokens.refreshToken)
- 
     return {
-      ...tokens,
+      refreshToken: refreshToken,
+      accessToken: newAccessToken,
       user: user
     }
   }
@@ -92,7 +112,7 @@ export class AuthService {
   async resetPassword(password: string, token: string, user_id: any) {
     try {
       await this.validateEnterToResetPassword(user_id, token)
-      
+
       const hashPassword = await bcrypt.hash(password, 3)
       const user = await this.UserModel.findByIdAndUpdate(user_id, { password: hashPassword })
 
@@ -118,7 +138,7 @@ export class AuthService {
     if (!result) throw ApiError.AccessDenied()
 
     return result
-  }    
+  }
 
   async sendResetLink(email: string) {
     let candidate = await this.UserModel.findOne({ email })
@@ -133,12 +153,12 @@ export class AuthService {
     //sendMail({ link: link }, 'reset-password.hbs', [candidate.email], 'single')
 
     return link
-  }    
-  
+  }
+
   async logout(refreshToken: string) {
     return await this.TokenService.removeToken(refreshToken)
   }
-  
+
   async update(new_user: UserFromClient, user: UserFromClient) {
     return await this.UserModel.findByIdAndUpdate(user._id, new_user, {
       new: true,

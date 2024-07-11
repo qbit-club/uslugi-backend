@@ -61,24 +61,33 @@ export class AuthController {
 	@Get('refresh')
 	async refresh(
 		@Req() req: Request,
-		@Res({ passthrough: true }) res: Response,
+		@Res() res: Response,
 	) {
-		const { refreshToken } = req.cookies
+		const { refreshToken, token } = req.cookies
 		
-		const userData = await this.AuthService.refresh(refreshToken)
+		// проверить, валиден ещё accessToken
+		// если accessToken не валиден - сделать новый с помощью refreshToken
+		const userData = await this.AuthService.refresh(refreshToken, token)
 
-		let newRefreshToken = userData.refreshToken
-		delete userData.refreshToken
-		
 		res.cookie(
 			'refreshToken',
-			newRefreshToken,
+			refreshToken,
 			{
 				maxAge: 30 * 24 * 60 * 60 * 1000,
 				httpOnly: true,
 				secure: eval(process.env.HTTPS)
 			}
-		).json(userData)
+		)
+		res.cookie(
+			'token',
+			userData.accessToken,
+			{
+				maxAge: 15 * 60 * 1000,
+				httpOnly: true,
+				secure: eval(process.env.HTTPS)
+			}
+		)
+		res.json(userData.user)
 	}
 
 	@HttpCode(HttpStatus.OK)
