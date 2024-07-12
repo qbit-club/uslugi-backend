@@ -67,4 +67,11 @@ export class RestController {
     }
     return await this.RestModel.findByIdAndUpdate(restId, { $push: { foodList: foodListItem } }, { new: true })
   }
+  @Post('/menu')
+  async addToMenu(
+    @Body('foodListItemId') foodListItemId: string,
+    @Body('restId') restId: string
+  ) {
+    return await this.RestModel.findByIdAndUpdate(restId, { $push: { menu: foodListItemId } }, { new: true })
+  }
 }

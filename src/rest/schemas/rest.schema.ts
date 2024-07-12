@@ -14,7 +14,7 @@ class FoodListClass {
   })
   name: string
   @Prop({
-    type: String  
+    type: String
   })
   category: string
 }
@@ -90,7 +90,7 @@ export class RestClass {
   tables: Table[]
 
   @Prop({
-    type: [{ type: mongoose.Schema.Types.ObjectId, refPath: 'foodList' }],
+    type: [{ type: mongoose.Schema.Types.ObjectId, refPath: 'foodList', unique: true }],
     default: [],
   })
   menu: mongoose.Schema.Types.ObjectId[]
