@@ -8,8 +8,7 @@ import { TokenModule } from './token/token.module';
 import { UserModule } from './user/user.module';
 import { RolesModule } from './roles/roles.module';
 import { S3Module } from './s3/s3.module';
-import { RestModule } from './hall/rest.module';
-import { MenuModule } from './menu/menu.module';
+import { RestModule } from './rest/rest.module';
 
 @Module({
   imports: [
@@ -28,7 +27,6 @@ import { MenuModule } from './menu/menu.module';
     RolesModule,
     S3Module,
     RestModule,
-    MenuModule
   ],
   controllers: [AppController],
   providers: [AppService],

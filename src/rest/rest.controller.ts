@@ -1,9 +1,10 @@
 // core imports
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Put, Query, UploadedFiles, UseInterceptors } from '@nestjs/common';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 
 // interfaces
-import { RestFromClient } from './interfaces/rest-from-client.interface';
+import type { RestFromClient } from './interfaces/rest-from-client.interface';
+import type { FoodListItem } from './interfaces/food-list-item.interface';
 
 // services
 import { RestService } from './rest.service';
@@ -52,5 +53,17 @@ export class RestController {
     };
 
     return await this.RestModel.findByIdAndUpdate(restId, { $set: { images: filenames } })
+  }
+  @Put('/food-list')
+  async changeFoodList(
+    @Body('restId') restId: string,
+    @Body('foodListItem') foodListItem: FoodListItem
+  ) {
+    if (foodListItem?._id !== undefined) {
+      return await this.RestModel.updateOne({ _id: restId, 'foodList._id': foodListItem._id },
+        { $set: { foodList: foodListItem } }
+      )
+    }
+    return await this.RestModel.findByIdAndUpdate(restId, { $push: { foodList: foodListItem } })
   }
 }
