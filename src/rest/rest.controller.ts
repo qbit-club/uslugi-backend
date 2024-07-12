@@ -60,10 +60,11 @@ export class RestController {
     @Body('foodListItem') foodListItem: FoodListItem
   ) {
     if (foodListItem?._id !== undefined) {
-      return await this.RestModel.updateOne({ _id: restId, 'foodList._id': foodListItem._id },
-        { $set: { foodList: foodListItem } }
+      await this.RestModel.updateOne({ _id: restId, 'foodList._id': foodListItem._id },
+        { $set: { 'foodList.$': foodListItem } },
       )
+      return await this.RestModel.findById(restId)
     }
-    return await this.RestModel.findByIdAndUpdate(restId, { $push: { foodList: foodListItem } })
+    return await this.RestModel.findByIdAndUpdate(restId, { $push: { foodList: foodListItem } }, { new: true })
   }
 }
