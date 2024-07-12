@@ -70,10 +70,10 @@ export class RestClass {
   author: User
 
   @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Menu',
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Menu' }],
+    default: [],
   })
-  menu: Menu
+  menu: mongoose.Schema.Types.ObjectId[]
 
   @Prop({
     type: Array,

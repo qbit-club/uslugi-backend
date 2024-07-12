@@ -1,5 +1,5 @@
 // core imports
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Put, Query, UploadedFiles, UseInterceptors } from '@nestjs/common';
 // interfaces
 import type { MenuFromClient } from './interfaces/menu-from-client.interface';
 // services
@@ -19,15 +19,21 @@ export class MenuController {
   ) { }
   /**
    * create new menu document
-   * @param menu from client form
+   * @param menuItem from client form, can be with _id
+   * @param restId
    */
-  @Post('/')
-  async create(@Body() menu: MenuFromClient) {
-    let menuFromDb = await this.MenuModel.create(menu)
-    return await this.RestModel.findByIdAndUpdate('', { $set: { menu: menuFromDb._id } })
+  @Put('/')
+  async changeMenu(
+    @Body('menuItem') menuItem: MenuFromClient,
+    @Body('restId') restId: string
+  ) {
+    if (menuItem._id !== undefined) {
+      let menuId = menuItem._id
+      delete menuItem._id
+      return await this.MenuModel.findById(menuId, { ...menuItem });
+    } else {
+      let menuId = await this.MenuModel.create(menuItem)
+      return await this.RestModel.findByIdAndUpdate(restId, { $push: { menu: menuId } })
+    }
   }
-  // @Put('/')
-  // async addMenuItems(@Body()) {
-    
-  // }
 }

@@ -1,3 +1,5 @@
 export interface MenuFromClient {
-  field: any
+  name: string
+  category: string
+  _id: string | undefined
 }

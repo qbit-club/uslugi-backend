@@ -10,7 +10,12 @@ export class MenuClass {
     type: String,
     required: true,
   })
-  title: string
+  name: string
+  @Prop({
+    type: String,
+    required: true,
+  })
+  category: string
 }
 
 export const MenuSchema = SchemaFactory.createForClass(MenuClass)
