@@ -34,6 +34,12 @@ export class RestController {
   async getAll() {
     return await this.RestModel.find({})
   }
+  
+  @Get('delete')
+
+  async deleteRest(@Query('rest_id') restId: String) {
+    return await this.RestModel.findByIdAndDelete(restId)
+  }
   @Post('one-by-alias')
   async oneByAlias(@Body('alias') alias: string) {
     return await this.RestModel.findOne({ alias })
@@ -51,8 +57,9 @@ export class RestController {
       let uploadResult = await YaCloud.Upload({ file, path: 'restaurants', fileName: file.originalname })
       filenames.push(uploadResult.Location)
     };
+    console.log(filenames)
 
-    return await this.RestModel.findByIdAndUpdate(restId, { $set: { images: filenames } })
+    return await this.RestModel.findByIdAndUpdate(restId, { $set: {'images.logo': filenames[0], 'images.headerimage': filenames[1]  } })
   }
   @Put('/food-list')
   async changeFoodList(

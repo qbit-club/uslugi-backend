@@ -68,7 +68,7 @@ export class RestClass {
     type: Array,
     required: false,
   })
-  images: String[]
+  images: Object 
 
   @Prop({
     type: Object,
