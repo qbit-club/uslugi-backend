@@ -85,7 +85,7 @@ export class RestClass {
 
   @Prop({
     type: Array,
-    required: true
+    required: false
   })
   tables: Table[]
 

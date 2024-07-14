@@ -8,5 +8,5 @@ export interface RestFromClient {
   schedule: string,
   description: string,
   author: string
-  tables: Table[]
+  tables?: Table[]
 }
