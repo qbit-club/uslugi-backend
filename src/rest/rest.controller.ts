@@ -1,5 +1,16 @@
 // core imports
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Put, Query, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Put,
+  Query,
+  UploadedFiles,
+  UseInterceptors,
+} from '@nestjs/common';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 
 // interfaces
@@ -22,27 +33,32 @@ export class RestController {
     private RestService: RestService,
     @InjectModel('Rest') private RestModel: Model<RestClass>,
     @InjectModel('User') private UserModel: Model<UserClass>,
-  ) { }
+  ) {}
   @Post()
   async create(@Body('rest') rest: RestFromClient) {
-    const restCallback = await this.RestModel.create(rest)
-    await this.UserModel.findByIdAndUpdate(restCallback.author, { $push: { rests: restCallback._id } })
-    return restCallback
+    const restCallback = await this.RestModel.create(rest);
+    await this.UserModel.findByIdAndUpdate(restCallback.author, {
+      $push: { rests: restCallback._id },
+    });
+    return restCallback;
   }
 
   @Get('all')
   async getAll() {
-    return await this.RestModel.find({})
+    return await this.RestModel.find({});
   }
-  
-  @Get('delete')
 
+  @Get('delete')
   async deleteRest(@Query('rest_id') restId: String) {
-    return await this.RestModel.findByIdAndDelete(restId)
+    await this.UserModel.updateOne(
+      { rests: restId },
+      { $pull: { rests: restId } },
+    );
+    return await this.RestModel.findByIdAndDelete(restId);
   }
   @Post('one-by-alias')
   async oneByAlias(@Body('alias') alias: string) {
-    return await this.RestModel.findOne({ alias })
+    return await this.RestModel.findOne({ alias });
   }
 
   @Post('images')
@@ -51,32 +67,47 @@ export class RestController {
     @UploadedFiles() files: Array<Express.Multer.File>,
     @Query('rest_id') restId: String,
   ) {
-    let filenames = []
+    let filenames = [];
 
     for (let file of files) {
-      let uploadResult = await YaCloud.Upload({ file, path: 'restaurants', fileName: file.originalname })
-      filenames.push(uploadResult.Location)
-    };
-    return await this.RestModel.findByIdAndUpdate(restId, { $set: {'images.logo': filenames[0], 'images.headerimage': filenames[1]  } })
+      let uploadResult = await YaCloud.Upload({
+        file,
+        path: 'restaurants',
+        fileName: file.originalname,
+      });
+      filenames.push(uploadResult.Location);
+    }
+    return await this.RestModel.findByIdAndUpdate(restId, {
+      $set: { 'images.logo': filenames[0], 'images.headerimage': filenames[1] },
+    });
   }
   @Put('/food-list')
   async changeFoodList(
     @Body('restId') restId: string,
-    @Body('foodListItem') foodListItem: FoodListItem
+    @Body('foodListItem') foodListItem: FoodListItem,
   ) {
     if (foodListItem?._id !== undefined) {
-      await this.RestModel.updateOne({ _id: restId, 'foodList._id': foodListItem._id },
+      await this.RestModel.updateOne(
+        { _id: restId, 'foodList._id': foodListItem._id },
         { $set: { 'foodList.$': foodListItem } },
-      )
-      return await this.RestModel.findById(restId)
+      );
+      return await this.RestModel.findById(restId);
     }
-    return await this.RestModel.findByIdAndUpdate(restId, { $push: { foodList: foodListItem } }, { new: true })
+    return await this.RestModel.findByIdAndUpdate(
+      restId,
+      { $push: { foodList: foodListItem } },
+      { new: true },
+    );
   }
   @Post('/menu')
   async addToMenu(
     @Body('foodListItemId') foodListItemId: string,
-    @Body('restId') restId: string
+    @Body('restId') restId: string,
   ) {
-    return await this.RestModel.findByIdAndUpdate(restId, { $push: { menu: foodListItemId } }, { new: true })
+    return await this.RestModel.findByIdAndUpdate(
+      restId,
+      { $push: { menu: foodListItemId } },
+      { new: true },
+    );
   }
 }
