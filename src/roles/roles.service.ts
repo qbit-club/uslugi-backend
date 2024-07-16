@@ -1,62 +1,45 @@
 import { Injectable } from '@nestjs/common';
-import mongoose from 'mongoose';
+import {Role} from './interfaces/role.interface'
+import mongoose, { ObjectId } from 'mongoose';
 
 @Injectable()
 export class RolesService {
-  getIdFromRole(role: string): string {
-    return role.split('-')[2]
+  getTypeFromRole(role: Role): string {
+    return role.type
+  }
+  getRestIdsFromRoles(role: Role): mongoose.Types.ObjectId[] {
+    return role.rest_ids
   }
 
-  getObjectIdFromRole(role: string): mongoose.Types.ObjectId {
-    return new mongoose.Types.ObjectId(this.getIdFromRole(role))
+  isAdminOfRest(role: Role, rest_id: string): boolean {
+    return this.getRestIdsFromRoles(role).includes(new mongoose.Types.ObjectId(rest_id))
   }
 
-  getOrgIdsFromRoles(roles: string[]): string[] {
-    return roles
-      .filter(role => role.includes('org-admin-'))
-      .map(role => this.getIdFromRole(role))
+  // getRolesWithRest(roles: Role, org_id: string): string[] {
+  //   roles.push(`manager-${org_id}`)
+  //   return roles
+  // }
+
+  // getRolesWithoutRest(roles: Role, org_id: string): string[] {
+  //   return roles.filter(role => !role.includes(`manager-${org_id}`))
+  // }
+
+  //is some admin
+
+  isAdmin(roles: Role) {
+    return roles.type == 'admin'
+  }
+  isManager(roles: Role) {
+    return roles.type = 'manager'
   }
 
-  getOrgIdFromRole(role: string): string {
-    return role.split('org-admin-')[1]
-  }
+  // getType(roles: string[]): string {
+  //   if (this.isGlobalAdmin(roles))
+  //     return 'глобальный админ'
 
-  getOrgObjectIdsFromRoles(roles: string[]): mongoose.Types.ObjectId[] {
-    return this.getOrgIdsFromRoles(roles).map(item => new mongoose.Types.ObjectId(item))
-  }
+  //   if (this.isSomeAdmin(roles))
+  //     return 'админ'
 
-  getOrgObjectIdFromRole(role: string): mongoose.Types.ObjectId {
-    return new mongoose.Types.ObjectId(role.split('org-admin-')[1])
-  }
-
-  isAdminOfOrg(roles: string[], org_id: string): boolean {
-    return roles.includes(`org-admin-${org_id}`)
-  }
-
-  getRolesWithOrg(roles: string[], org_id: string): string[] {
-    roles.push(`org-admin-${org_id}`)
-    return roles
-  }
-
-  getRolesWithoutOrg(roles: string[], org_id: string): string[] {
-    return roles.filter(role => !role.includes(`org-admin-${org_id}`))
-  }
-
-  isSomeAdmin(roles: string[]): boolean {
-    return roles.some(role => role.split('-')[1] === 'admin')
-  }
-
-  isGlobalAdmin(roles: string[]) {
-    return roles.includes('global-admin')
-  }  
-
-  getType(roles: string[]): string {
-    if (this.isGlobalAdmin(roles))
-      return 'глобальный админ'
-      
-    if (this.isSomeAdmin(roles))
-      return 'админ'
-      
-    return 'пользователь'
-  }
+  //   return 'пользователь'
+  // }
 }

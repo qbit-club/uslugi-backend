@@ -52,4 +52,23 @@ export class UserController {
       rests: 1
     })
   }
+
+  // (this.RolesService.isManager(req_roles) && this.RolesService.isAdminOfRest(req_roles, rest_id))
+  // @UseGuards(SomeAdminGuard)
+
+//   @HttpCode(HttpStatus.OK)
+//   @Post('set-manager')
+//   async setManagerByAdmin(
+//     @Body('rest_id') rest_id: string, 
+//     @Body('user_id') user_id: string,
+//     @Req() req: RequestWithUser,
+//   ) {
+//     let req_roles = req.user.roles
+//     let user = await this.UserModel.findById(user_id)
+//     if (!this.RolesService.isAdmin(req_roles))
+//       throw ApiError.AccessDenied()
+
+//     roles.push(`manager-${rest_id}`)
+//     return roles
+//   }
 }
