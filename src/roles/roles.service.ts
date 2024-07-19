@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {Role} from './interfaces/role.interface'
+import { Role } from './interfaces/role.interface'
 import mongoose, { ObjectId } from 'mongoose';
 
 @Injectable()
@@ -10,7 +10,6 @@ export class RolesService {
   getRestIdsFromRoles(role: Role): mongoose.Types.ObjectId[] {
     return role.rest_ids
   }
-
   isAdminOfRest(role: Role, rest_id: string): boolean {
     return this.getRestIdsFromRoles(role).includes(new mongoose.Types.ObjectId(rest_id))
   }

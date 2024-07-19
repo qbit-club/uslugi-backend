@@ -30,7 +30,7 @@ export class UserClass {
     default: {type:[],rest_ids:[]},
     required: false
   })
-  roles: Role
+  role: Role
 
   @Prop({
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Rest' }],
