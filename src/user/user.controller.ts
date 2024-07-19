@@ -1,6 +1,7 @@
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import mongoose from 'mongoose';
 import { SomeAdminGuard } from 'src/admin/some_admin.guard';
 import ApiError from 'src/exceptions/errors/api-error';
 import { RolesService } from 'src/roles/roles.service';
@@ -54,18 +55,16 @@ export class UserController {
     })
   }
 
-  @UseGuards(GlobalAdminGuard)
+  // @UseGuards(GlobalAdminGuard)
   @HttpCode(HttpStatus.OK)
   @Post('set-manager')
   async setManagerByAdmin(
     @Req() req: RequestWithUser,
-    @Body('user_id') user_id: string,
-    @Body('rest_id') rest_id: string,
+    @Body('user_email') user_email: string,
+    @Body('chosen_rest') chosen_rest: string,
   ) {
-    let user = await this.UserModel.findById(user_id)
-    if (!this.RolesService.isManager(user.role)) {
-      await user.updateOne({ "role.type": "manager" })
-    }
-    await user.updateOne({ "role.rest_ids": rest_id })
+    await this.UserModel.updateOne({ "email": user_email },
+    { $set: { "role.type": "manager" }, $push: { "role.rest_ids": chosen_rest } },
+    { runValidators: true })
   }
 }
