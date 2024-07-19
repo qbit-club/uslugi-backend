@@ -7,18 +7,18 @@ import type { FoodListItem } from '../interfaces/food-list-item.interface'
 
 export type RestDocument = HydratedDocument<RestClass>
 
-@Schema()
-class FoodListClass {
-  @Prop({
-    type: String
-  })
-  name: string
-  @Prop({
-    type: String
-  })
-  category: string
-}
-const FoodListSchema = SchemaFactory.createForClass(FoodListClass);
+// @Schema()
+// class FoodListClass {
+//   @Prop({
+//     type: String
+//   })
+//   name: string
+//   @Prop({
+//     type: String
+//   })
+//   category: string
+// }
+// const FoodListSchema = SchemaFactory.createForClass(FoodListClass);
 
 
 @Schema()
@@ -89,16 +89,19 @@ export class RestClass {
   })
   tables: Table[]
 
-  @Prop({
-    type: [{ type: mongoose.Schema.Types.ObjectId, refPath: 'foodList', unique: true }],
-    default: [],
-  })
-  menu: mongoose.Schema.Types.ObjectId[]
+  // @Prop({
+  //   type: [{ type: mongoose.Schema.Types.ObjectId, refPath: 'foodList', unique: true }],
+  //   default: [],
+  //   required:false
+  //   //Пока что
+  // })
+  // menu: mongoose.Schema.Types.ObjectId[]
+  
 
-  @Prop({
-    type: [FoodListSchema],
-  })
-  foodList: FoodListItem[]
+  // @Prop({
+  //   type: [FoodListSchema],
+  // })
+  // foodList: FoodListItem[]
 }
 
 export const RestSchema = SchemaFactory.createForClass(RestClass)

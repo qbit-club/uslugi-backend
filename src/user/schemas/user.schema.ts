@@ -27,7 +27,7 @@ export class UserClass {
 
   @Prop({
     type: Object,
-    default: {type:[],rest_ids:[]},
+    default: {type:"",rest_ids:[]},
     required: false
   })
   role: Role
