@@ -21,7 +21,7 @@ export class GlobalAdminGuard implements CanActivate {
     try {
       const payload = await this.jwtService.verifyAsync(token, { secret: process.env.JWT_ACCESS_SECRET })
 
-      if (!this.RolesService.isGlobalAdmin(payload.roles))
+      if (!this.RolesService.isAdmin(payload.role))
         throw ApiError.AccessDenied()
 
       request.user = payload
