@@ -14,6 +14,10 @@ export class AppStateController {
     @InjectModel('AppState') private AppStateModel: Model<AppStateClass>,
   ) {}
 
+  @Get()
+  getAppState() {
+    return this.AppStateModel.findOne({})
+  }
 
   @Get('get-food-categories')
   getAllCategories() {
