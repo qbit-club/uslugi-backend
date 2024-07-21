@@ -3,7 +3,7 @@ import { HydratedDocument } from 'mongoose';
 import type { Table } from '../interfaces/table.interface';
 import * as mongoose from 'mongoose';
 import type { User } from 'src/user/interfaces/user.interface';
-import type { FoodListItem } from '../interfaces/food-list-item.interface'
+import type { FoodListItemFromDb } from '../interfaces/food-list-item-from-db.interface'
 
 export type RestDocument = HydratedDocument<RestClass>
 
@@ -27,6 +27,11 @@ class FoodListClass {
     type: String
   })
   price: string
+
+  @Prop({
+    type: [String]
+  })
+  images: string[]
 }
 const FoodListSchema = SchemaFactory.createForClass(FoodListClass);
 
@@ -108,7 +113,7 @@ export class RestClass {
   @Prop({
     type: [FoodListSchema],
   })
-  foodList: FoodListItem[]
+  foodList: FoodListItemFromDb[]
 }
 
 export const RestSchema = SchemaFactory.createForClass(RestClass)

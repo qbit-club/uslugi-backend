@@ -115,7 +115,34 @@ export class RestController {
   async createFoodListItem(
     @Body('foodListItem') foodListItem: FoodListItem,
     @Body('restId') restId: string,
-  ) {    
-    return await this.RestModel.findByIdAndUpdate(restId, { $push: { foodList: foodListItem } })
+  ) {
+    return await this.RestModel.findByIdAndUpdate(restId, { $push: { foodList: foodListItem } }, { new: true })
+  }
+  @Post('food-list-images')
+  @UseInterceptors(AnyFilesInterceptor())
+  async uploadFoodListImages(
+    @UploadedFiles() files: Array<Express.Multer.File>,
+    @Query('rest_id') restId: String,
+    @Query('item_id') foodListItemId: String,
+  ) {
+    let filenames = [];
+
+    for (let file of files) {
+      let uploadResult = await YaCloud.Upload({
+        file,
+        path: 'restaurants',
+        fileName: file.originalname,
+      });
+      filenames.push(uploadResult.Location);
+    }
+    let restFromDb = await this.RestModel.findById(restId)
+    for (let i = 0; i < restFromDb.foodList.length; i++) {
+      if (restFromDb.foodList[i]._id.toString() == foodListItemId) {
+        restFromDb.foodList[i].images = filenames
+        break
+      }
+    }
+    restFromDb.markModified('foodList')
+    return await restFromDb.save()
   }
 }
