@@ -58,13 +58,13 @@ export class UserController {
   // @UseGuards(GlobalAdminGuard)
   @HttpCode(HttpStatus.OK)
   @Post('set-manager')
-  async setManagerByAdmin(
+  async setManager(
     @Req() req: RequestWithUser,
     @Body('user_email') user_email: string,
     @Body('chosen_rest') chosen_rest: string,
   ) {
-    await this.UserModel.updateOne({ "email": user_email },
-    { $set: { "role.type": "manager" }, $push: { "role.rest_ids": chosen_rest } },
-    { runValidators: true })
+    await this.UserModel.updateOne({ $and: [{ "email": user_email }, { "role.rest_ids":  {$nin:[chosen_rest]} }] },
+      { $set: { "role.type": "manager" }, $push: { "role.rest_ids": chosen_rest } },
+      { runValidators: true })
   }
 }
