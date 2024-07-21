@@ -33,7 +33,7 @@ export class RestController {
     private RestService: RestService,
     @InjectModel('Rest') private RestModel: Model<RestClass>,
     @InjectModel('User') private UserModel: Model<UserClass>,
-  ) {}
+  ) { }
   @Post()
   async create(@Body('rest') rest: RestFromClient) {
     const restCallback = await this.RestModel.create(rest);
@@ -86,18 +86,19 @@ export class RestController {
     @Body('restId') restId: string,
     @Body('foodListItem') foodListItem: FoodListItem,
   ) {
-    if (foodListItem?._id !== undefined) {
-      await this.RestModel.updateOne(
-        { _id: restId, 'foodList._id': foodListItem._id },
-        { $set: { 'foodList.$': foodListItem } },
-      );
-      return await this.RestModel.findById(restId);
-    }
-    return await this.RestModel.findByIdAndUpdate(
-      restId,
-      { $push: { foodList: foodListItem } },
-      { new: true },
-    );
+    return 'deprecated route'
+    // if (foodListItem?._id !== undefined) {
+    //   await this.RestModel.updateOne(
+    //     { _id: restId, 'foodList._id': foodListItem._id },
+    //     { $set: { 'foodList.$': foodListItem } },
+    //   );
+    //   return await this.RestModel.findById(restId);
+    // }
+    // return await this.RestModel.findByIdAndUpdate(
+    //   restId,
+    //   { $push: { foodList: foodListItem } },
+    //   { new: true },
+    // );
   }
   @Post('/menu')
   async addToMenu(
@@ -109,5 +110,12 @@ export class RestController {
       { $push: { menu: foodListItemId } },
       { new: true },
     );
+  }
+  @Post('food-list')
+  async createFoodListItem(
+    @Body('foodListItem') foodListItem: FoodListItem,
+    @Body('restId') restId: string,
+  ) {    
+    return await this.RestModel.findByIdAndUpdate(restId, { $push: { foodList: foodListItem } })
   }
 }

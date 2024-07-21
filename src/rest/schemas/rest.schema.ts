@@ -17,6 +17,16 @@ class FoodListClass {
     type: String
   })
   category: string
+
+  @Prop({
+    type: Object
+  })
+  health: object
+
+  @Prop({
+    type: String
+  })
+  price: string
 }
 const FoodListSchema = SchemaFactory.createForClass(FoodListClass);
 

@@ -1,7 +1,11 @@
-import * as mongoose from 'mongoose'
-
 export interface FoodListItem {
   name: string
   category: string
-  _id: mongoose.Types.ObjectId | undefined
+  health: {
+    protein: number
+    carb: number
+    fat: number
+    energy: string
+  }
+  price:  string
 }
