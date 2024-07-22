@@ -6,6 +6,8 @@ export interface FoodListItem {
     carb: number
     fat: number
     energy: string
+    mass: string
+    ingredients: string
   }
   price: string
   images: string[]
