@@ -3,6 +3,8 @@ import {
   Body,
   Controller,
   Get,
+  Patch,
+  Delete,
   HttpCode,
   HttpStatus,
   Post,
@@ -12,6 +14,7 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
+import ApiError from 'src/exceptions/errors/api-error';
 
 // interfaces
 import type { RestFromClient } from './interfaces/rest-from-client.interface';
@@ -26,6 +29,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { RestClass } from './schemas/rest.schema';
 import { UserClass } from 'src/user/schemas/user.schema';
+import * as mongoose from 'mongoose';
 
 @Controller('rest')
 export class RestController {
@@ -147,5 +151,26 @@ export class RestController {
     }
     restFromDb.markModified('foodList')
     return await restFromDb.save()
+  }
+  @Patch('move-food-list-item-to-menu')
+  async moveFoodItemToMenu(
+    @Body('restId') restId: string,
+    @Body('foodListItemId') foodListItemId: mongoose.Schema.Types.ObjectId
+  ) {
+    let restFromDb = await this.RestModel.findById(restId)
+    for (let id of restFromDb.menu) {
+      if (String(id) == String(foodListItemId)) {
+        throw ApiError.BadRequest('Уже в меню')
+      }
+    }
+    restFromDb.menu.push(foodListItemId)
+    return restFromDb.save()
+  }
+  @Delete('delete-from-menu')
+  async deleteFromMenu(
+    @Query('rest_id') restId: string,
+    @Query('menu_item_id') menuItemId: string,
+  ) {
+    return await this.RestModel.findByIdAndUpdate(restId, { $pull: { menu: menuItemId } }, { new: true })
   }
 }

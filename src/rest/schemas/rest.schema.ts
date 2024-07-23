@@ -83,7 +83,7 @@ export class RestClass {
     type: Array,
     required: false,
   })
-  images: Object 
+  images: Object
 
   @Prop({
     type: Object,
@@ -104,14 +104,12 @@ export class RestClass {
   })
   tables: Table[]
 
-  // @Prop({
-  //   type: [{ type: mongoose.Schema.Types.ObjectId, refPath: 'foodList', unique: true }],
-  //   default: [],
-  //   required:false
-  //   //Пока что
-  // })
-  // menu: mongoose.Schema.Types.ObjectId[]
-  
+  @Prop({
+    type: [{ type: mongoose.Schema.Types.ObjectId, refPath: 'foodList', unique: true }],
+    default: [],
+    required: false
+  })
+  menu: mongoose.Schema.Types.ObjectId[]
 
   @Prop({
     type: [FoodListSchema],
