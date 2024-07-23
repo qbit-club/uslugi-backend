@@ -8,4 +8,5 @@ export interface User {
   password: string
   role: Role
   rests: string[]
+  managingRest: string
 }

@@ -27,7 +27,7 @@ export class UserClass {
 
   @Prop({
     type: Object,
-    default: {type:"",rest_ids:[]},
+    default: { type: "", rest_ids: [] },
     required: false
   })
   role: Role
@@ -37,6 +37,13 @@ export class UserClass {
     default: [],
   })
   rests: mongoose.Schema.Types.ObjectId[]
+
+  @Prop({
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Rest',
+    required: false
+  })
+  managingRest: mongoose.Schema.Types.ObjectId
 }
 
 export const UserSchema = SchemaFactory.createForClass(UserClass)

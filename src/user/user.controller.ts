@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, Req, UseGuards, Patch } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import mongoose from 'mongoose';
@@ -63,8 +63,16 @@ export class UserController {
     @Body('user_email') user_email: string,
     @Body('chosen_rest') chosen_rest: string,
   ) {
-    await this.UserModel.updateOne({ $and: [{ "email": user_email }, { "role.rest_ids":  {$nin:[chosen_rest]} }] },
+    await this.UserModel.updateOne({ $and: [{ "email": user_email }, { "role.rest_ids": { $nin: [chosen_rest] } }] },
       { $set: { "role.type": "manager" }, $push: { "role.rest_ids": chosen_rest } },
       { runValidators: true })
+  }
+
+  @Patch('choose-managing-rest')
+  async chooseManagingRests(
+    @Body('userId') userId: string,
+    @Body('restId') restId: string
+  ) {
+    return this.UserModel.findByIdAndUpdate(userId, { managingRest: restId })
   }
 }
