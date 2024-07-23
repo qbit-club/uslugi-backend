@@ -73,6 +73,7 @@ export class UserController {
     @Body('userId') userId: string,
     @Body('restId') restId: string
   ) {
-    return this.UserModel.findByIdAndUpdate(userId, { managingRest: restId })
+    if (!restId) return await this.UserModel.findById(userId)
+    return await this.UserModel.findByIdAndUpdate(userId, { managingRest: restId }, { new: true })
   }
 }
