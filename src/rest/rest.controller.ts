@@ -40,9 +40,8 @@ export class RestController {
   ) { }
   @Post()
   async create(@Body('rest') rest: RestFromClient) {
-    // if (!rest.menu){
-    //   rest.menu=[]
-    // }
+    console.log(rest);
+
     const restCallback = await this.RestModel.create(rest);
     await this.UserModel.findByIdAndUpdate(restCallback.author, {
       $push: { rests: restCallback._id },
@@ -65,7 +64,7 @@ export class RestController {
   }
   @Post('one-by-alias')
   async oneByAlias(@Body('alias') alias: string) {
-    return await this.RestModel.findOne({ alias });
+    return (await this.RestModel.findOne({ alias })).populateMenu();
   }
   @Get('by-id')
   async getById(@Query('_id') _id: string) {
@@ -168,7 +167,9 @@ export class RestController {
       }
     }
     restFromDb.menu.push(foodListItemId)
-    return restFromDb.save()
+
+    restFromDb.markModified('menu')
+    return await restFromDb.save()
   }
   @Delete('delete-from-menu')
   async deleteFromMenu(

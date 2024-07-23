@@ -8,35 +8,6 @@ import type { FoodListItemFromDb } from '../interfaces/food-list-item-from-db.in
 export type RestDocument = HydratedDocument<RestClass>
 
 @Schema()
-class FoodListClass {
-  @Prop({
-    type: String
-  })
-  name: string
-  @Prop({
-    type: String
-  })
-  category: string
-
-  @Prop({
-    type: Object
-  })
-  health: object
-
-  @Prop({
-    type: String
-  })
-  price: string
-
-  @Prop({
-    type: [String]
-  })
-  images: string[]
-}
-const FoodListSchema = SchemaFactory.createForClass(FoodListClass);
-
-
-@Schema()
 export class RestClass {
   @Prop({
     type: String,
@@ -105,16 +76,32 @@ export class RestClass {
   tables: Table[]
 
   @Prop({
-    type: [{ type: mongoose.Schema.Types.ObjectId, refPath: 'foodList', unique: true }],
+    type: Array,
     default: [],
-    required: false
   })
-  menu: mongoose.Schema.Types.ObjectId[]
+  menu: mongoose.Schema.Types.ObjectId[] & FoodListItemFromDb[]
 
   @Prop({
-    type: [FoodListSchema],
+    type: Array,
   })
   foodList: FoodListItemFromDb[]
+
+  populateMenu() {
+    let menu = this.menu
+    this.menu = []
+    for (let menuItem of menu) {
+      for (let foodListItem of this.foodList) {
+        if (String(foodListItem._id) == String(menuItem)) {
+          this.menu.push(foodListItem)
+          break
+        }
+      }
+    }
+
+    return this
+  }
 }
 
 export const RestSchema = SchemaFactory.createForClass(RestClass)
+// без этого кастомные методы не будут работать
+RestSchema.loadClass(RestClass)
