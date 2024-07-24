@@ -40,8 +40,6 @@ export class RestController {
   ) { }
   @Post()
   async create(@Body('rest') rest: RestFromClient) {
-    console.log(rest);
-
     const restCallback = await this.RestModel.create(rest);
     await this.UserModel.findByIdAndUpdate(restCallback.author, {
       $push: { rests: restCallback._id },

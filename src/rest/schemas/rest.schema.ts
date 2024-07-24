@@ -77,7 +77,8 @@ export class RestClass {
 
   @Prop({
     type: Array,
-    default: [],
+    // default: [],
+    required: false
   })
   menu: mongoose.Schema.Types.ObjectId[] & FoodListItemFromDb[]
 
