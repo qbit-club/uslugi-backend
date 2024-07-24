@@ -46,6 +46,14 @@ export class RestController {
     });
     return restCallback;
   }
+  @Put()
+  async update(
+    @Body('rest') rest: RestFromClient,
+    @Query('rest_id') restId: string
+  ) {
+    const restCallback = await this.RestModel.updateOne({ _id: restId }, rest);
+    return { _id: restId }
+  }
 
   @Get('all')
   async getAll() {
@@ -85,8 +93,13 @@ export class RestController {
       });
       filenames.push(uploadResult.Location);
     }
+
+    let setObj = {}
+    if (filenames[0]) setObj['images.logo'] = filenames[0]
+    if (filenames[1]) setObj['images.headerimage'] = filenames[1]
+
     return await this.RestModel.findByIdAndUpdate(restId, {
-      $set: { 'images.logo': filenames[0], 'images.headerimage': filenames[1] },
+      $set: setObj,
     });
   }
   @Put('/food-list')
