@@ -4,5 +4,5 @@ export interface UserFromClient {
   name: string
   email: string
   password: string
-  role: Role
+  roles: Role[]
 }

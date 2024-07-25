@@ -10,6 +10,7 @@ import { UserFromClient } from './interfaces/user-from-client.interface';
 import { UserClass } from './schemas/user.schema';
 import { UserService } from './user.service';
 import { GlobalAdminGuard } from 'src/admin/global_admin.guard';
+import { Role } from '../roles/interfaces/role.interface';
 
 @Controller('user')
 export class UserController {
@@ -63,9 +64,30 @@ export class UserController {
     @Body('user_email') user_email: string,
     @Body('chosen_rest') chosen_rest: string,
   ) {
-    await this.UserModel.updateOne({ $and: [{ "email": user_email }, { "role.rest_ids": { $nin: [chosen_rest] } }] },
-      { $set: { "role.type": "manager" }, $push: { "role.rest_ids": chosen_rest } },
-      { runValidators: true })
+    let result = await this.UserModel.updateOne(
+      { email: user_email },
+      { $addToSet: { "roles.$[t].rest_ids": chosen_rest } },
+      { arrayFilters: [{ "t.type": "manager" }], runValidators: true },
+    );
+    return result;
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @Post('add-role')
+  async addRole(
+    @Req() req: RequestWithUser,
+    @Body('user_email') user_email: string,
+    @Body('role_type') role_type: string,
+  ) {
+    let role: Role = {
+      type: role_type,
+      rest_ids: []
+    }
+    return await this.UserModel.updateOne(
+      { email: user_email, "role.type":{$nin:[role_type]}},
+      { $addToSet: { "roles": role } },
+      { runValidators: true },
+    )
   }
 
   @Patch('choose-managing-rest')

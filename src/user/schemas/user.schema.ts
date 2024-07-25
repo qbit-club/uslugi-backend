@@ -26,11 +26,11 @@ export class UserClass {
   password: string
 
   @Prop({
-    type: Object,
-    default: { type: "", rest_ids: [] },
+    type: Array,
+    default: [],
     required: false
   })
-  role: Role
+  roles: Role[]
 
   @Prop({
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Rest' }],

@@ -1,17 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { Role } from './interfaces/role.interface'
-import mongoose, { ObjectId } from 'mongoose';
+import mongoose from 'mongoose';
 
 @Injectable()
 export class RolesService {
   getTypeFromRole(role: Role): string {
     return role.type
   }
-  getRestIdsFromRoles(role: Role): mongoose.Types.ObjectId[] {
+  getRestIdsFromRole(role: Role): mongoose.Types.ObjectId[] {
     return role.rest_ids
   }
-  isAdminOfRest(role: Role, rest_id: string): boolean {
-    return this.getRestIdsFromRoles(role).includes(new mongoose.Types.ObjectId(rest_id))
+  HaveKeyOfRest(role: Role, rest_id: string): boolean {
+    return this.getRestIdsFromRole(role).includes(new mongoose.Types.ObjectId(rest_id))
+  }
+  isAdmin(role: Role) {
+    return role.type == 'admin'
+  }
+  isManager(role: Role) {
+    return role.type = 'manager'
   }
 
   // getRolesWithRest(roles: Role, org_id: string): string[] {
@@ -25,12 +31,6 @@ export class RolesService {
 
   //is some admin
 
-  isAdmin(roles: Role) {
-    return roles.type == 'admin'
-  }
-  isManager(roles: Role) {
-    return roles.type = 'manager'
-  }
 
   // getType(roles: string[]): string {
   //   if (this.isGlobalAdmin(roles))
