@@ -55,9 +55,13 @@ export class RestController {
     return { _id: restId }
   }
 
-  @Get('all')
-  async getAll() {
-    return await this.RestModel.find({});
+  @Get('get-managers')
+  async getManagersOfRest(@Query('alias') alias: string) {
+    let users = await this.UserModel.find(
+      { "roles":{$elemMatch:{"type":"manager","rest_ids":{$in:[alias]} }}},
+      {runValidators:true}
+    );
+    return users;
   }
 
   @Get('delete')
