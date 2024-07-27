@@ -9,4 +9,5 @@ export interface User {
   roles: Role[]
   rests: string[]
   managingRest: string
+  orders: string[]
 }
