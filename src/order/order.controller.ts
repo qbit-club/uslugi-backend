@@ -22,7 +22,10 @@ export class OrderController {
   @Post()
   async create(@Body('order') order: Order) {
     let orderFromDb = await this.OrderModel.create(order)
-    return await this.UserModel.findByIdAndUpdate(order.user, { $push: { orders: orderFromDb._id } }, { new: true })
+    return {
+      user: await this.UserModel.findByIdAndUpdate(order.user, { $push: { orders: orderFromDb._id } }, { new: true }),
+      order: orderFromDb
+    }
   }
   @Post()
   async getOrdersByOrdersId(@Body('ordersId') ordersId: Order[]) {
