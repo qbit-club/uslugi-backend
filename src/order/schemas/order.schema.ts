@@ -3,32 +3,34 @@ import { HydratedDocument } from 'mongoose';
 
 import * as mongoose from 'mongoose';
 
-
-export type OrderDocument = HydratedDocument<OrderClass>
+export type OrderDocument = HydratedDocument<OrderClass>;
 
 @Schema()
 export class OrderClass {
   @Prop({
-    type: Array
+    type: Array,
   })
-  items: [{
-    price: number,
-    count: number,
-    menuItemId: string
-  }]
+  items: [
+    {
+      price: number;
+      count: number;
+      menuItemId: string;
+    },
+  ];
+
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Rest',
-    required: true
+    required: true,
   })
-  rest: mongoose.Schema.Types.ObjectId
+  rest: { _id: mongoose.Schema.Types.ObjectId; title: string };
 
   @Prop({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: true
+    required: true,
   })
-  user: mongoose.Schema.Types.ObjectId
+  user: mongoose.Schema.Types.ObjectId;
 }
 
-export const OrderSchema = SchemaFactory.createForClass(OrderClass)
+export const OrderSchema = SchemaFactory.createForClass(OrderClass);

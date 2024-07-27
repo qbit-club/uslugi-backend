@@ -27,10 +27,29 @@ export class OrderController {
       order: orderFromDb
     }
   }
-  @Post()
-  async getOrdersByOrdersId(@Body('ordersId') ordersId: Order[]) {
-
-    return await this.OrderModel.findById(ordersId)
+  @Post('order-by-orderId')
+  async getOrdersByOrdersId(@Body('ordersId') ordersId: string[]) {
+    try {
+      const orders = await this.OrderModel.find({ _id: { $in: ordersId } },{user:0}).populate('rest', 'title');
+      const grouped: { [key: string]:any[] } = {};
+      orders.forEach(order => {
+        const rest = order.rest.title || "Без названия";
+        if (!grouped[rest]) {
+            grouped[rest] = [];
+        }
+        grouped[rest].push(order);
+    });
+    return Object.keys(grouped)
+        .sort()
+        .map(rest => ({
+            rest,
+            orders: grouped[rest]
+        }));
+      return grouped;
+    } catch (error) {
+      console.error(error);
+    
+    }
   }
 
   
