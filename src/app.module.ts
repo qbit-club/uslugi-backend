@@ -10,6 +10,7 @@ import { RolesModule } from './roles/roles.module';
 import { S3Module } from './s3/s3.module';
 import { RestModule } from './rest/rest.module';
 import { AppStateModule } from './app-state/app-state.module';
+import { OrderModule } from './order/order.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { AppStateModule } from './app-state/app-state.module';
     S3Module,
     RestModule,
     AppStateModule,
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [AppService],
