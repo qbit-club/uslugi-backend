@@ -54,6 +54,10 @@ export class RestController {
     const restCallback = await this.RestModel.updateOne({ _id: restId }, rest);
     return { _id: restId }
   }
+  @Get('all')
+  async getAll() {
+    return await this.RestModel.find({});
+  }
 
   @Get('get-managers')
   async getManagersOfRest(@Query('alias') alias: string) {
