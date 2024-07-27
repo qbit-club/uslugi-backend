@@ -59,13 +59,14 @@ export class RestController {
     return await this.RestModel.find({});
   }
 
+  @HttpCode(HttpStatus.OK)
   @Get('get-managers')
   async getManagersOfRest(@Query('alias') alias: string) {
-    let users = await this.UserModel.find(
+    let managers = await this.UserModel.find(
       { "roles":{$elemMatch:{"type":"manager","rest_ids":{$in:[alias]} }}},
       {runValidators:true}
-    );
-    return users;
+    ).populate(["email"])
+    return managers
   }
 
   @Get('delete')
@@ -76,6 +77,7 @@ export class RestController {
     );
     return await this.RestModel.findByIdAndDelete(restId);
   }
+  
   @Post('one-by-alias')
   async oneByAlias(@Body('alias') alias: string) {
     return (await this.RestModel.findOne({ alias })).populateMenu();

@@ -1,4 +1,15 @@
-import { Body, Controller, Get, HttpCode, HttpStatus, Post, Query, Req, UseGuards, Patch } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Query,
+  Req,
+  UseGuards,
+  Patch,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import mongoose from 'mongoose';
@@ -17,19 +28,17 @@ export class UserController {
   constructor(
     @InjectModel('User') private UserModel: Model<UserClass>,
     private UserService: UserService,
-    private RolesService: RolesService
-  ) { }
+    private RolesService: RolesService,
+  ) {}
 
   @HttpCode(HttpStatus.OK)
   @Get('get-by-id')
-  async get_by_id(
-    @Query('_id') _id: string,
-  ) {
-    let candidate = await this.UserModel.findById(_id, { password: 0 })
+  async get_by_id(@Query('_id') _id: string) {
+    let candidate = await this.UserModel.findById(_id, { password: 0 });
     if (!candidate)
-      throw ApiError.BadRequest('Пользователь с таким ID не найден')
+      throw ApiError.BadRequest('Пользователь с таким ID не найден');
 
-    return candidate
+    return candidate;
   }
 
   @HttpCode(HttpStatus.OK)
@@ -37,23 +46,23 @@ export class UserController {
   @Post('change-user')
   async changeUser(
     @Req() req: RequestWithUser,
-    @Body('user') user: UserFromClient
+    @Body('user') user: UserFromClient,
   ) {
-    let subject_user = await this.UserModel.findById(user._id)
+    let subject_user = await this.UserModel.findById(user._id);
 
     // ... Защиты, проверки
 
-    await subject_user.updateOne(user, { runValidators: true })
+    await subject_user.updateOne(user, { runValidators: true });
   }
 
   @HttpCode(HttpStatus.OK)
   @Get('rests')
-  async getUserRests(
-    @Query() query: any
-  ) {
-    return await this.UserModel.findById(query.userId).populate('rests').select({
-      rests: 1
-    })
+  async getUserRests(@Query() query: any) {
+    return await this.UserModel.findById(query.userId)
+      .populate('rests')
+      .select({
+        rests: 1,
+      });
   }
 
   // @UseGuards(GlobalAdminGuard)
@@ -64,38 +73,77 @@ export class UserController {
     @Body('user_email') user_email: string,
     @Body('chosen_rest') chosen_rest: string,
   ) {
-    let result = await this.UserModel.updateOne(
+    let result;
+    if (
+      !this.RolesService.isManager(
+        (await this.UserModel.findOne({ email: user_email })).roles,
+      )
+    ) {
+      await this.addRole(user_email, 'manager');
+    }
+
+    result = await this.UserModel.updateOne(
       { email: user_email },
-      { $addToSet: { "roles.$[t].rest_ids": chosen_rest } },
-      { arrayFilters: [{ "t.type": "manager" }], runValidators: true },
+      { $addToSet: { 'roles.$[t].rest_ids': chosen_rest } },
+      { arrayFilters: [{ 't.type': 'manager' }], runValidators: true },
     );
     return result;
   }
 
+  // @UseGuards(GlobalAdminGuard)
   @HttpCode(HttpStatus.OK)
-  @Post('add-role')
-  async addRole(
+  @Post('delete-manager')
+  async deleteManager(
     @Req() req: RequestWithUser,
-    @Body('user_email') user_email: string,
-    @Body('role_type') role_type: string,
+    @Body('manager_email') manager_email: string,
+    @Body('manager_rest') manager_rest: string,
   ) {
+    let statement = this.RolesService.getRestIdsFromRoleInRoles(
+      (await this.UserModel.findOne({ email: manager_email })).roles,
+      'manager',
+    );
+    console.log(manager_rest)
+    if (statement.length == 1) {
+      return await this.deleteRole(manager_email, 'manager');
+    } else {
+      return await this.UserModel.updateOne(
+        { email: manager_email },
+        { $pull: { 'roles.$[t].rest_ids': manager_rest } },
+        { arrayFilters: [{ 't.type': 'manager' }], runValidators: true },
+      );
+    }
+  }
+
+  async addRole(user_email: string, role_type: string) {
     let role: Role = {
       type: role_type,
-      rest_ids: []
-    }
+      rest_ids: [],
+    };
     return await this.UserModel.updateOne(
-      { email: user_email, "role.type":{$nin:[role_type]}},
-      { $addToSet: { "roles": role } },
+      { email: user_email, 'role.type': { $nin: [role_type] } },
+      { $addToSet: { roles: role } },
       { runValidators: true },
-    )
+    );
+  }
+
+  async deleteRole(user_email: string, role_type: string) {
+    return await this.UserModel.updateOne(
+      { email: user_email },
+      { $unset: { 'roles.$[t]': '' } },
+      { arrayFilters: [{ 't.type': role_type }], runValidators: true },
+    );
   }
 
   @Patch('choose-managing-rest')
   async chooseManagingRests(
     @Body('userId') userId: string,
-    @Body('restId') restId: string
+    @Body('restId') restId: string,
   ) {
-    if (!restId) return await this.UserModel.findById(userId)
-    return await this.UserModel.findByIdAndUpdate(userId, { managingRest: restId }, { new: true })
+    if (!restId) return await this.UserModel.findById(userId);
+    return await this.UserModel.findByIdAndUpdate(
+      userId,
+      { managingRest: restId },
+      { new: true },
+    );
   }
 }
