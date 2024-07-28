@@ -19,6 +19,7 @@ import { RolesService } from 'src/roles/roles.service';
 import RequestWithUser from 'src/types/request-with-user.type';
 import { UserFromClient } from './interfaces/user-from-client.interface';
 import { UserClass } from './schemas/user.schema';
+import { RestClass } from '../rest/schemas/rest.schema';
 import { UserService } from './user.service';
 import { GlobalAdminGuard } from 'src/admin/global_admin.guard';
 import { Role } from '../roles/interfaces/role.interface';
@@ -26,17 +27,19 @@ import { Role } from '../roles/interfaces/role.interface';
 @Controller('user')
 export class UserController {
   constructor(
+    @InjectModel('Rest') private RestModel: Model<RestClass>,
     @InjectModel('User') private UserModel: Model<UserClass>,
+
     private UserService: UserService,
     private RolesService: RolesService,
   ) {}
 
   @HttpCode(HttpStatus.OK)
   @Get('get-by-id')
-  async get_by_id(
-    @Query('_id') _id: string,
-  ) {
-    let candidate = await this.UserModel.findById(_id, { password: 0 }).populate('orders')
+  async get_by_id(@Query('_id') _id: string) {
+    let candidate = await this.UserModel.findById(_id, {
+      password: 0,
+    }).populate('orders');
     if (!candidate)
       throw ApiError.BadRequest('Пользователь с таким ID не найден');
 
@@ -71,25 +74,48 @@ export class UserController {
   @HttpCode(HttpStatus.OK)
   @Post('set-manager')
   async setManager(
-    @Req() req: RequestWithUser,
     @Body('user_email') user_email: string,
     @Body('chosen_rest') chosen_rest: string,
   ) {
-    let result;
-    if (
-      !this.RolesService.isManager(
-        (await this.UserModel.findOne({ email: user_email })).roles,
-      )
-    ) {
-      await this.addRole(user_email, 'manager');
-    }
+    const user = await this.UserModel.findOne({ email: user_email });
 
-    result = await this.UserModel.updateOne(
-      { email: user_email },
-      { $addToSet: { 'roles.$[t].rest_ids': chosen_rest } },
-      { arrayFilters: [{ 't.type': 'manager' }], runValidators: true },
+    if (!user) {
+      throw new ApiError(404, `User with email ${user_email} not found`);
+    }
+    await this.RestModel.updateOne(
+      { _id: chosen_rest },
+      { $addToSet: { managers: user_email } },
     );
-    return result;
+
+    // Check if the user already has a manager role
+    const hasManagerRole = user.roles.some((role) => role.type === 'manager');
+
+    if (hasManagerRole) {
+      // User has a manager role, update the existing role
+      return await this.UserModel.updateOne(
+        { email: user_email },
+        {
+          $addToSet: { 'roles.$[t].rest_ids': chosen_rest },
+        },
+        {
+          arrayFilters: [{ 't.type': 'manager' }],
+          runValidators: true,
+        },
+      );
+    } else {
+      // User does not have a manager role, add it
+      return await this.UserModel.updateOne(
+        { email: user_email },
+        {
+          $push: {
+            roles: { type: 'manager', rest_ids: [chosen_rest] },
+          },
+        },
+        {
+          runValidators: true,
+        },
+      );
+    }
   }
 
   // @UseGuards(GlobalAdminGuard)
@@ -98,22 +124,16 @@ export class UserController {
   async deleteManager(
     @Req() req: RequestWithUser,
     @Body('manager_email') manager_email: string,
-    @Body('manager_rest') manager_rest: string,
+    @Body('restId') restId: string,
   ) {
-    let statement = this.RolesService.getRestIdsFromRoleInRoles(
-      (await this.UserModel.findOne({ email: manager_email })).roles,
-      'manager',
+    await this.UserModel.updateOne(
+      { email: manager_email, 'roles.type': 'manager' },
+      { $pull: { 'roles.$.rest_ids': restId } },
     );
-    console.log(manager_rest)
-    if (statement.length == 1) {
-      return await this.deleteRole(manager_email, 'manager');
-    } else {
-      return await this.UserModel.updateOne(
-        { email: manager_email },
-        { $pull: { 'roles.$[t].rest_ids': manager_rest } },
-        { arrayFilters: [{ 't.type': 'manager' }], runValidators: true },
-      );
-    }
+    return this.RestModel.updateOne(
+      { _id: restId },
+      { $pull: { managers: manager_email } },
+    );
   }
 
   async addRole(user_email: string, role_type: string) {

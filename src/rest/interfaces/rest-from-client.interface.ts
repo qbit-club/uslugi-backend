@@ -10,4 +10,5 @@ export interface RestFromClient {
   tables?: Table[] 
   description: string
   schedule: string
+  managers?:string[]
 }

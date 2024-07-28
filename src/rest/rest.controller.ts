@@ -37,7 +37,7 @@ export class RestController {
     private RestService: RestService,
     @InjectModel('Rest') private RestModel: Model<RestClass>,
     @InjectModel('User') private UserModel: Model<UserClass>,
-  ) { }
+  ) {}
   @Post()
   async create(@Body('rest') rest: RestFromClient) {
     const restCallback = await this.RestModel.create(rest);
@@ -49,24 +49,30 @@ export class RestController {
   @Put()
   async update(
     @Body('rest') rest: RestFromClient,
-    @Query('rest_id') restId: string
+    @Query('rest_id') restId: string,
   ) {
     const restCallback = await this.RestModel.updateOne({ _id: restId }, rest);
-    return { _id: restId }
+    return { _id: restId };
   }
   @Get('all')
   async getAll() {
     return await this.RestModel.find({});
   }
+  @Get('rests-name')
+  async getRestsName() {
+    return await this.RestModel.find({}, { title: 1, managers: 1 });
+  }
 
   @HttpCode(HttpStatus.OK)
   @Get('get-managers')
-  async getManagersOfRest(@Query('alias') alias: string) {
+  async getManagersOfRest(@Query('rest_id') rest_id: string) {
     let managers = await this.UserModel.find(
-      { "roles":{$elemMatch:{"type":"manager","rest_ids":{$in:[alias]} }}},
-      {runValidators:true}
-    ).populate(["email"])
-    return managers
+      {
+        roles: { $elemMatch: { type: 'manager', rest_ids: { $in: [rest_id] } } },
+      },
+      { runValidators: true },
+    ).populate(['email']);
+    return managers;
   }
 
   @Get('delete')
@@ -77,15 +83,15 @@ export class RestController {
     );
     return await this.RestModel.findByIdAndDelete(restId);
   }
-  
+
   @Post('one-by-alias')
   async oneByAlias(@Body('alias') alias: string) {
     return (await this.RestModel.findOne({ alias })).populateMenu();
   }
   @Get('by-id')
   async getById(@Query('_id') _id: string) {
-    if (_id == '') return {}
-    return await this.RestModel.findById(_id)
+    if (_id == '') return {};
+    return await this.RestModel.findById(_id);
   }
   @Post('images')
   @UseInterceptors(AnyFilesInterceptor())
@@ -104,9 +110,9 @@ export class RestController {
       filenames.push(uploadResult.Location);
     }
 
-    let setObj = {}
-    if (filenames[0]) setObj['images.logo'] = filenames[0]
-    if (filenames[1]) setObj['images.headerimage'] = filenames[1]
+    let setObj = {};
+    if (filenames[0]) setObj['images.logo'] = filenames[0];
+    if (filenames[1]) setObj['images.headerimage'] = filenames[1];
 
     return await this.RestModel.findByIdAndUpdate(restId, {
       $set: setObj,
@@ -117,7 +123,7 @@ export class RestController {
     @Body('restId') restId: string,
     @Body('foodListItem') foodListItem: FoodListItem,
   ) {
-    return 'deprecated route'
+    return 'deprecated route';
     // if (foodListItem?._id !== undefined) {
     //   await this.RestModel.updateOne(
     //     { _id: restId, 'foodList._id': foodListItem._id },
@@ -147,7 +153,11 @@ export class RestController {
     @Body('foodListItem') foodListItem: FoodListItem,
     @Body('restId') restId: string,
   ) {
-    return await this.RestModel.findByIdAndUpdate(restId, { $push: { foodList: foodListItem } }, { new: true })
+    return await this.RestModel.findByIdAndUpdate(
+      restId,
+      { $push: { foodList: foodListItem } },
+      { new: true },
+    );
   }
   @Post('food-list-images')
   @UseInterceptors(AnyFilesInterceptor())
@@ -166,37 +176,41 @@ export class RestController {
       });
       filenames.push(uploadResult.Location);
     }
-    let restFromDb = await this.RestModel.findById(restId)
+    let restFromDb = await this.RestModel.findById(restId);
     for (let i = 0; i < restFromDb.foodList.length; i++) {
       if (restFromDb.foodList[i]._id.toString() == foodListItemId) {
-        restFromDb.foodList[i].images = filenames
-        break
+        restFromDb.foodList[i].images = filenames;
+        break;
       }
     }
-    restFromDb.markModified('foodList')
-    return await restFromDb.save()
+    restFromDb.markModified('foodList');
+    return await restFromDb.save();
   }
   @Patch('move-food-list-item-to-menu')
   async moveFoodItemToMenu(
     @Body('restId') restId: string,
-    @Body('foodListItemId') foodListItemId: mongoose.Schema.Types.ObjectId
+    @Body('foodListItemId') foodListItemId: mongoose.Schema.Types.ObjectId,
   ) {
-    let restFromDb = await this.RestModel.findById(restId)
+    let restFromDb = await this.RestModel.findById(restId);
     for (let id of restFromDb.menu) {
       if (String(id) == String(foodListItemId)) {
-        throw ApiError.BadRequest('Уже в меню')
+        throw ApiError.BadRequest('Уже в меню');
       }
     }
-    restFromDb.menu.push(foodListItemId)
+    restFromDb.menu.push(foodListItemId);
 
-    restFromDb.markModified('menu')
-    return await restFromDb.save()
+    restFromDb.markModified('menu');
+    return await restFromDb.save();
   }
   @Delete('delete-from-menu')
   async deleteFromMenu(
     @Query('rest_id') restId: string,
     @Query('menu_item_id') menuItemId: string,
   ) {
-    return await this.RestModel.findByIdAndUpdate(restId, { $pull: { menu: menuItemId } }, { new: true })
+    return await this.RestModel.findByIdAndUpdate(
+      restId,
+      { $pull: { menu: menuItemId } },
+      { new: true },
+    );
   }
 }
