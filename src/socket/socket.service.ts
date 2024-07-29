@@ -3,17 +3,27 @@ import { ConnectedSocket, MessageBody, OnGatewayConnection, SubscribeMessage, We
 @WebSocketGateway({
   cors: {
     origin: '*'
-  }
+  },
+  namespace: 'orders'
 })
 export class SocketService implements OnGatewayConnection {
   handleConnection(client: any) {
   }
 
-  @SubscribeMessage("server-create-order")
+  @SubscribeMessage('join-room')
+  joinRoom(
+    @ConnectedSocket() client: any,
+    @MessageBody('room') room: any
+  ) {
+    console.log('joined room:', room);
+    client.join(room)
+  }
+
+  @SubscribeMessage("create-order-to-server")
   handleEvent(
     @MessageBody('order') order: any,
     @ConnectedSocket() client: any
-  ) {    
-    client.emit("client-create-order", order)
+  ) {
+    client.to(order.rest).emit("create-order-to-client", order)
   }
 }
