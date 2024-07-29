@@ -61,12 +61,12 @@ export class RestClass {
   })
   location: Object;
 
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: true,
-  })
-  author: User;
+  // @Prop({
+  //   type: mongoose.Schema.Types.ObjectId,
+  //   ref: 'User',
+  //   required: true,
+  // })
+  // author: User;
 
   @Prop({
     type: Array,
@@ -76,13 +76,14 @@ export class RestClass {
 
   @Prop({
     type: Array,
-    // default: [],
+  
     required: false,
   })
   menu: mongoose.Schema.Types.ObjectId[] & FoodListItemFromDb[];
 
   @Prop({
     type: Array,
+   
   })
   foodList: FoodListItemFromDb[];
 
@@ -97,7 +98,6 @@ export class RestClass {
         }
       }
     }
-
     return this;
   }
   @Prop({

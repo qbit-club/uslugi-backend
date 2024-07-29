@@ -41,9 +41,9 @@ export class RestController {
   @Post()
   async create(@Body('rest') rest: RestFromClient) {
     const restCallback = await this.RestModel.create(rest);
-    await this.UserModel.findByIdAndUpdate(restCallback.author, {
-      $push: { rests: restCallback._id },
-    });
+    // await this.UserModel.findByIdAndUpdate(restCallback.author, {
+    //   $push: { rests: restCallback._id },
+    // });
     return restCallback;
   }
   @Put()
@@ -93,6 +93,12 @@ export class RestController {
     if (_id == '') return {};
     return await this.RestModel.findById(_id);
   }
+  @Post('by-ids')
+  async getByIds(@Body('_ids') _ids: string[],) {
+    return await this.RestModel.find({ _id: { $in: _ids } });
+  }
+
+  
   @Post('images')
   @UseInterceptors(AnyFilesInterceptor())
   async uploadFile(

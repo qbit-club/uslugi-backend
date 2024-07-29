@@ -39,7 +39,7 @@ export class UserController {
   async get_by_id(@Query('_id') _id: string) {
     let candidate = await this.UserModel.findById(_id, {
       password: 0,
-    }).populate('orders');
+    }).populate('orders').populate('managerIn');
     if (!candidate)
       throw ApiError.BadRequest('Пользователь с таким ID не найден');
 
@@ -88,18 +88,14 @@ export class UserController {
     );
 
     // Check if the user already has a manager role
-    const hasManagerRole = user.roles.some((role) => role.type === 'manager');
+    const hasManagerRole = user.roles.some((role) => role === 'manager');
 
     if (hasManagerRole) {
       // User has a manager role, update the existing role
       return await this.UserModel.updateOne(
         { email: user_email },
         {
-          $addToSet: { 'roles.$[t].rest_ids': chosen_rest },
-        },
-        {
-          arrayFilters: [{ 't.type': 'manager' }],
-          runValidators: true,
+          $addToSet: { managerIn: chosen_rest },
         },
       );
     } else {
@@ -108,11 +104,10 @@ export class UserController {
         { email: user_email },
         {
           $push: {
-            roles: { type: 'manager', rest_ids: [chosen_rest] },
+            managerIn: chosen_rest,
+            roles: "manager"
           },
-        },
-        {
-          runValidators: true,
+         
         },
       );
     }
@@ -127,34 +122,34 @@ export class UserController {
     @Body('restId') restId: string,
   ) {
     await this.UserModel.updateOne(
-      { email: manager_email, 'roles.type': 'manager' },
-      { $pull: { 'roles.$.rest_ids': restId } },
+      { email: manager_email, 'roles': 'manager' },
+      { $pull: { 'managerIn': restId } },
     );
     return this.RestModel.updateOne(
       { _id: restId },
-      { $pull: { managers: manager_email } },
+      { $pull: { 'managers': manager_email } },
     );
   }
 
-  async addRole(user_email: string, role_type: string) {
-    let role: Role = {
-      type: role_type,
-      rest_ids: [],
-    };
-    return await this.UserModel.updateOne(
-      { email: user_email, 'role.type': { $nin: [role_type] } },
-      { $addToSet: { roles: role } },
-      { runValidators: true },
-    );
-  }
+  // async addRole(user_email: string, role_type: string) {
+  //   let role: Role = {
+  //     type: role_type,
+  //     rest_ids: [],
+  //   };
+  //   return await this.UserModel.updateOne(
+  //     { email: user_email, 'role.type': { $nin: [role_type] } },
+  //     { $addToSet: { roles: role } },
+  //     { runValidators: true },
+  //   );
+  // }
 
-  async deleteRole(user_email: string, role_type: string) {
-    return await this.UserModel.updateOne(
-      { email: user_email },
-      { $unset: { 'roles.$[t]': '' } },
-      { arrayFilters: [{ 't.type': role_type }], runValidators: true },
-    );
-  }
+  // async deleteRole(user_email: string, role_type: string) {
+  //   return await this.UserModel.updateOne(
+  //     { email: user_email },
+  //     { $unset: { 'roles.$[t]': '' } },
+  //     { arrayFilters: [{ 't.type': role_type }], runValidators: true },
+  //   );
+  // }
 
   @Patch('choose-managing-rest')
   async chooseManagingRests(
