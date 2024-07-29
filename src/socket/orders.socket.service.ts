@@ -6,7 +6,7 @@ import { ConnectedSocket, MessageBody, OnGatewayConnection, SubscribeMessage, We
   },
   namespace: 'orders'
 })
-export class SocketService implements OnGatewayConnection {
+export class OrdersSocketService implements OnGatewayConnection {
   handleConnection(client: any) {
   }
 

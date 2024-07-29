@@ -11,7 +11,7 @@ import { S3Module } from './s3/s3.module';
 import { RestModule } from './rest/rest.module';
 import { AppStateModule } from './app-state/app-state.module';
 import { OrderModule } from './order/order.module';
-import { SocketService } from './socket/socket.service';
+import { OrdersSocketService } from './socket/orders.socket.service';
 
 @Module({
   imports: [
@@ -34,6 +34,6 @@ import { SocketService } from './socket/socket.service';
     OrderModule,
   ],
   controllers: [AppController],
-  providers: [AppService, SocketService],
+  providers: [AppService, OrdersSocketService],
 })
 export class AppModule {}
