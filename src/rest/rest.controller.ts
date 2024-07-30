@@ -184,7 +184,7 @@ export class RestController {
     }
     let restFromDb = await this.RestModel.findById(restId);
     for (let i = 0; i < restFromDb.foodList.length; i++) {
-      if (restFromDb.foodList[i]._id.toString() == foodListItemId) {
+      if (String(restFromDb.foodList[i]._id) == foodListItemId) {
         restFromDb.foodList[i].images = filenames;
         break;
       }
