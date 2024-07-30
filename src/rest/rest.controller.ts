@@ -196,7 +196,7 @@ export class RestController {
   async moveFoodItemToMenu(
     @Body('restId') restId: string,
     @Body('foodListItemId') foodListItemId: mongoose.Schema.Types.ObjectId,
-  ) {
+  ) {    
     let restFromDb = await this.RestModel.findById(restId);
     for (let id of restFromDb.menu) {
       if (String(id) == String(foodListItemId)) {
