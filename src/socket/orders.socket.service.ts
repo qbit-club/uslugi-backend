@@ -24,6 +24,7 @@ export class OrdersSocketService implements OnGatewayConnection {
     @MessageBody('order') order: any,
     @ConnectedSocket() client: any
   ) {
+    // send event TO the room with name order.rest
     client.to(order.rest).emit("create-order-to-client", order)
   }
 }
