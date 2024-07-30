@@ -43,6 +43,13 @@ export class UserClass {
   managerIn: mongoose.Schema.Types.ObjectId[];
   
   @Prop({
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'Rest',
+    required: false
+  })
+  managingRest: mongoose.Schema.Types.ObjectId
+  
+  @Prop({
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Rest' }],
     default: [],
   })
