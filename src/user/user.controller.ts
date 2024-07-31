@@ -163,4 +163,16 @@ export class UserController {
       { new: true },
     );
   }
+
+  @Get('manager-in-array')
+  async getManagerInArray(
+    @Query('user_id') userId: string
+  ) {
+    let userFromDb = await this.UserModel.findById(userId).populate({
+      path: 'managerIn',
+      select: ['title']
+    })
+    
+    return userFromDb.managerIn
+  }
 }
