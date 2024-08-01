@@ -76,14 +76,15 @@ export class RestClass {
 
   @Prop({
     type: Array,
-  
+    default: [],
     required: false,
   })
-  menu: mongoose.Schema.Types.ObjectId[] & FoodListItemFromDb[];
+  menu: String[] & Object[];
 
   @Prop({
     type: Array,
-   
+    default: [],
+    required: false,
   })
   foodList: FoodListItemFromDb[];
 
@@ -106,6 +107,11 @@ export class RestClass {
   })
   managers: string[];
   
+  @Prop({
+    type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order' }],
+    default: [],
+  })
+  orders: mongoose.Schema.Types.ObjectId[];
 }
 
 export const RestSchema = SchemaFactory.createForClass(RestClass);

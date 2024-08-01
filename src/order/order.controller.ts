@@ -24,6 +24,9 @@ export class OrderController {
   @Post()
   async create(@Body('order') order: Order) {
     let orderFromDb = await this.OrderModel.create(order)
+
+    await this.RestModel.findByIdAndUpdate(orderFromDb.rest, { $push: { orders: orderFromDb._id } })
+
     return {
       user: await this.UserModel.findByIdAndUpdate(order.user, { $push: { orders: orderFromDb._id } }, { new: true }),
       order: orderFromDb
@@ -64,38 +67,35 @@ export class OrderController {
   ) {
     let ordersFromDb = await this.OrderModel.find({ rest: restId })
       .populate({
-        path: 'rest',
-      })
-      .populate({
         path: 'user',
         select: ['name', 'email']
       })
     // foodList нужен, чтобы получить информацию по 
     // выбранным пользователем компонентам меню
-    let { foodList } = await this.RestModel.findById(restId)
+    // let { foodList } = await this.RestModel.findById(restId)
 
-    let result = []
-    // делаем то же самое, что и populate с menuItem у order.items
-    for (let order of ordersFromDb) {
-      let tmp = {
-        rest: order.rest,
-        user: order.user,
-        items: []
-      }
-      for (let item of order.items) {
-        for (let fl of foodList) {
-          if (item.menuItemId == String(fl._id)) {
-            tmp.items.push({
-              price: item.price,
-              count: item.count,
-              menuItem: fl
-            })
-            break;
-          }
-        }
-      }
-      result.push(tmp)
-    }
-    return result
+    // let result = []
+    // // делаем то же самое, что и populate с menuItem у order.items
+    // for (let order of ordersFromDb) {
+    //   let tmp = {
+    //     user: order.user,
+    //     items: []
+    //   }
+    //   for (let item of order.items) {
+        
+    //     for (let fl of foodList) {
+    //       if (item.menuItemId == fl._id?.toString()) {
+    //         tmp.items.push({
+    //           price: item.price,
+    //           count: item.count,
+    //           menuItem: fl
+    //         })            
+    //         break;
+    //       }
+    //     }
+    //   }
+    //   result.push(tmp)
+    // }
+    return ordersFromDb
   }
 }
