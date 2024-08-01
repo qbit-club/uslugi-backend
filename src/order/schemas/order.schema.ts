@@ -31,6 +31,12 @@ export class OrderClass {
     required: true,
   })
   user: mongoose.Schema.Types.ObjectId;
+
+  @Prop({
+    type: String,
+    required: true,
+  })
+  date: string;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(OrderClass);
