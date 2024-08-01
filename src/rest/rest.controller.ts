@@ -68,7 +68,9 @@ export class RestController {
   async getManagersOfRest(@Query('rest_id') rest_id: string) {
     let managers = await this.UserModel.find(
       {
-        roles: { $elemMatch: { type: 'manager', rest_ids: { $in: [rest_id] } } },
+        roles: {
+          $elemMatch: { type: 'manager', rest_ids: { $in: [rest_id] } },
+        },
       },
       { runValidators: true },
     ).populate(['email']);
@@ -94,11 +96,10 @@ export class RestController {
     return await this.RestModel.findById(_id);
   }
   @Post('by-ids')
-  async getByIds(@Body('_ids') _ids: string[],) {
+  async getByIds(@Body('_ids') _ids: string[]) {
     return await this.RestModel.find({ _id: { $in: _ids } });
   }
 
-  
   @Post('images')
   @UseInterceptors(AnyFilesInterceptor())
   async uploadFile(
@@ -159,9 +160,14 @@ export class RestController {
     @Body('foodListItem') foodListItem: FoodListItem,
     @Body('restId') restId: string,
   ) {
+    const newFoodListItem = {
+      ...foodListItem,
+      _id: new mongoose.Types.ObjectId(),
+    };
+    console.log(newFoodListItem);
     return await this.RestModel.findByIdAndUpdate(
       restId,
-      { $push: { foodList: foodListItem } },
+      { $push: { foodList: newFoodListItem } },
       { new: true },
     );
   }
