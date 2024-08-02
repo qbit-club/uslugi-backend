@@ -26,11 +26,10 @@ export class OrderClass {
   rest: { _id: mongoose.Schema.Types.ObjectId; title: string };
 
   @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    type: Object,
     required: true,
   })
-  user: mongoose.Schema.Types.ObjectId;
+  user: Object;
 
   @Prop({
     type: String,

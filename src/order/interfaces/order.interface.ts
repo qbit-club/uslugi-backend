@@ -5,6 +5,11 @@ export interface Order {
     menuItem: string
   }]
   rest: string,
-  user: string,
+  user: {
+    name: string,
+    phone: string,
+    address: string,
+    _id: string | undefined
+  },
   date: string
 }
