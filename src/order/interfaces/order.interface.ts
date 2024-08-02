@@ -9,6 +9,7 @@ export interface Order {
     name: string,
     phone: string,
     address: string,
+    comment: string,
     _id: string | undefined
   },
   date: string
