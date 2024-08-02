@@ -68,7 +68,9 @@ export class RestController {
   async getManagersOfRest(@Query('rest_id') rest_id: string) {
     let managers = await this.UserModel.find(
       {
-        roles: { $elemMatch: { type: 'manager', rest_ids: { $in: [rest_id] } } },
+        roles: {
+          $elemMatch: { type: 'manager', rest_ids: { $in: [rest_id] } },
+        },
       },
       { runValidators: true },
     ).populate(['email']);
@@ -94,11 +96,10 @@ export class RestController {
     return await this.RestModel.findById(_id);
   }
   @Post('by-ids')
-  async getByIds(@Body('_ids') _ids: string[],) {
+  async getByIds(@Body('_ids') _ids: string[]) {
     return await this.RestModel.find({ _id: { $in: _ids } });
   }
 
-  
   @Post('images')
   @UseInterceptors(AnyFilesInterceptor())
   async uploadFile(
@@ -148,9 +149,10 @@ export class RestController {
     @Body('foodListItemId') foodListItemId: string,
     @Body('restId') restId: string,
   ) {
+ 
     return await this.RestModel.findByIdAndUpdate(
       restId,
-      { $push: { menu: foodListItemId } },
+      { $addToSet: { menu: foodListItemId } },
       { new: true },
     );
   }
@@ -159,9 +161,14 @@ export class RestController {
     @Body('foodListItem') foodListItem: FoodListItem,
     @Body('restId') restId: string,
   ) {
+    const newFoodListItem = {
+      ...foodListItem,
+      _id: new mongoose.Types.ObjectId(),
+    };
+    console.log(newFoodListItem);
     return await this.RestModel.findByIdAndUpdate(
       restId,
-      { $push: { foodList: foodListItem } },
+      { $push: { foodList: newFoodListItem } },
       { new: true },
     );
   }
@@ -192,22 +199,22 @@ export class RestController {
     restFromDb.markModified('foodList');
     return await restFromDb.save();
   }
-  @Patch('move-food-list-item-to-menu')
-  async moveFoodItemToMenu(
-    @Body('restId') restId: string,
-    @Body('foodListItemId') foodListItemId: mongoose.Schema.Types.ObjectId,
-  ) {    
-    let restFromDb = await this.RestModel.findById(restId);
-    for (let id of restFromDb.menu) {
-      if (String(id) == String(foodListItemId)) {
-        throw ApiError.BadRequest('Уже в меню');
-      }
-    }
-    restFromDb.menu.push(foodListItemId);
+  // @Post('move-food-list-item-to-menu')
+  // async moveFoodItemToMenu(
+  //   @Body('restId') restId: string,
+  //   @Body('foodListItemId') foodListItemId: mongoose.Schema.Types.ObjectId,
+  // ) {
+  //   let restFromDb = await this.RestModel.findById(restId);
+  //   for (let id of restFromDb.menu) {
+  //     if (String(id) == String(foodListItemId)) {
+  //       throw ApiError.BadRequest('Уже в меню');
+  //     }
+  //   }
+  //   restFromDb.menu.push(foodListItemId);
 
-    restFromDb.markModified('menu');
-    return await restFromDb.save();
-  }
+  //   restFromDb.markModified('menu');
+  //   return await restFromDb.save();
+  // }
   @Delete('delete-from-menu')
   async deleteFromMenu(
     @Query('rest_id') restId: string,

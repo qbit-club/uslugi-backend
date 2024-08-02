@@ -5,5 +5,6 @@ export interface Order {
     menuItem: string
   }]
   rest: string,
-  user: string
+  user: string,
+  date: string
 }
