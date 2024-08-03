@@ -238,4 +238,23 @@ export class RestController {
       { new: true },
     );
   }
+
+  @Delete('delete-food-list-item')
+  async deleteFromFoodList(
+    @Query('rest_id') restId: string,
+    @Query('food_list_item_id') foodListItemId: string,
+  ) {
+    await this.RestModel.findByIdAndUpdate(
+      restId,
+      { $pull: { menu: foodListItemId } },
+      { new: true },
+    );
+    let res= await this.RestModel.findByIdAndUpdate(
+      restId,
+      { $pull: { "foodList":{"_id": new mongoose.Types.ObjectId(foodListItemId)}} },
+      { new: true },
+    );
+    return res
+  }
+
 }
