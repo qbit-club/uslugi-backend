@@ -1,17 +1,19 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { NestExpressApplication } from '@nestjs/platform-express';
+import { HttpExceptionFilter } from './exceptions/http-exception.filter';
+const cookieParser = require('cookie-parser');
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create(AppModule)
 
-  // Enable CORS
-  app.enableCors({
-    origin: process.env.CLIENT_URL, // Allow only this origin
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    allowedHeaders: 'Content-Type, Accept',
-  });
+  app.enableCors({ 
+    origin: [process.env.CLIENT_URL, 'http://localhost:3001', 'https://glazovest.ru'],
+    credentials: true
+  })
+  app.useGlobalFilters(new HttpExceptionFilter())
 
-  await app.listen(3000);
+  app.use(cookieParser())
+
+  await app.listen(process.env.PORT)
 }
-bootstrap();
+bootstrap()
