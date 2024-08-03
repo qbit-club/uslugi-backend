@@ -28,7 +28,7 @@ export class OrderController {
     await this.RestModel.findByIdAndUpdate(orderFromDb.rest, { $push: { orders: orderFromDb._id } })
 
     return {
-      user: await this.UserModel.findByIdAndUpdate(order.user, { $push: { orders: orderFromDb._id } }, { new: true }),
+      user: order.user?._id ? await this.UserModel.findByIdAndUpdate(order.user?._id, { $push: { orders: orderFromDb._id } }, { new: true }) : order.user,
       order: orderFromDb
     }
   }
@@ -82,7 +82,7 @@ export class OrderController {
     //     items: []
     //   }
     //   for (let item of order.items) {
-        
+
     //     for (let fl of foodList) {
     //       if (item.menuItemId == fl._id?.toString()) {
     //         tmp.items.push({
