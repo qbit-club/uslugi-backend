@@ -5,7 +5,7 @@ import { CorsOptions } from '@nestjs/common/interfaces/external/cors-options.int
 const cookieParser = require('cookie-parser');
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule)
+  const app = await NestFactory.create(AppModule, { cors: true })
   // Настройка CORS
   const corsOptions: CorsOptions = {
     origin: [process.env.CLIENT_URL, 'http://localhost:3001', 'https://glazovest.ru'],
