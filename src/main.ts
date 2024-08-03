@@ -1,21 +1,17 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { HttpExceptionFilter } from './exceptions/http-exception.filter';
-const cookieParser = require('cookie-parser');
+import { NestExpressApplication } from '@nestjs/platform-express';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule);
 
   // Enable CORS
   app.enableCors({
-    origin: process.env.CLIENT_URL,
+    origin: process.env.CLIENT_URL, // Allow only this origin
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
-    credentials: true,
+    allowedHeaders: 'Content-Type, Accept',
   });
 
-  app.useGlobalFilters(new HttpExceptionFilter());
-  app.use(cookieParser());
-
-  await app.listen(process.env.PORT);
+  await app.listen(3000);
 }
 bootstrap();
