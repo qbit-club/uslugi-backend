@@ -4,16 +4,18 @@ import { HttpExceptionFilter } from './exceptions/http-exception.filter';
 const cookieParser = require('cookie-parser');
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule)
+  const app = await NestFactory.create(AppModule);
 
-  app.enableCors({ 
-    origin: [process.env.CLIENT_URL, 'http://localhost:3001','https://glazovest.ru'],
-    credentials: true
-  })
-  app.useGlobalFilters(new HttpExceptionFilter())
+  // Enable CORS
+  app.enableCors({
+    origin: process.env.CLIENT_URL,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    credentials: true,
+  });
 
-  app.use(cookieParser())
+  app.useGlobalFilters(new HttpExceptionFilter());
+  app.use(cookieParser());
 
-  await app.listen(process.env.PORT)
+  await app.listen(process.env.PORT);
 }
-bootstrap()
+bootstrap();
