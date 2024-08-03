@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Put, Query } from '@nestjs/common';
 import { OrderService } from './order.service';
 
 // types
@@ -97,5 +97,13 @@ export class OrderController {
     //   result.push(tmp)
     // }
     return ordersFromDb
+  }
+
+  @Put('status')
+  async changeStatus(
+    @Body('orderId') orderId: string,
+    @Body('status') status: string
+  ) {
+    return await this.OrderModel.findByIdAndUpdate(orderId, { status })
   }
 }
