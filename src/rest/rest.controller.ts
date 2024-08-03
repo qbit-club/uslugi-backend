@@ -1,3 +1,4 @@
+import { FoodListItem } from './interfaces/food-list-item.interface';
 // core imports
 import {
   Body,
@@ -18,7 +19,6 @@ import ApiError from 'src/exceptions/errors/api-error';
 
 // interfaces
 import type { RestFromClient } from './interfaces/rest-from-client.interface';
-import type { FoodListItem } from './interfaces/food-list-item.interface';
 
 // services
 import { RestService } from './rest.service';
@@ -63,19 +63,19 @@ export class RestController {
     return await this.RestModel.find({}, { title: 1, managers: 1 });
   }
 
-  @HttpCode(HttpStatus.OK)
-  @Get('get-managers')
-  async getManagersOfRest(@Query('rest_id') rest_id: string) {
-    let managers = await this.UserModel.find(
-      {
-        roles: {
-          $elemMatch: { type: 'manager', rest_ids: { $in: [rest_id] } },
-        },
-      },
-      { runValidators: true },
-    ).populate(['email']);
-    return managers;
-  }
+  // @HttpCode(HttpStatus.OK)
+  // @Get('get-managers')
+  // async getManagersOfRest(@Query('rest_id') rest_id: string) {
+  //   let managers = await this.UserModel.find(
+  //     {
+  //       roles: {
+  //         $elemMatch: { type: 'manager', rest_ids: { $in: [rest_id] } },
+  //       },
+  //     },
+  //     { runValidators: true },
+  //   ).populate(['email']);
+  //   return managers;
+  // }
 
   @Get('delete')
   async deleteRest(@Query('rest_id') restId: String) {
@@ -125,12 +125,21 @@ export class RestController {
       $set: setObj,
     });
   }
-  @Put('/food-list')
-  async changeFoodList(
-    @Body('restId') restId: string,
+
+  @Put('/update-food-list')
+  async updateFoodListItem(
+    @Query('rest_id') restId: string,
+    @Query('item_id') foodListItemId: string,
     @Body('foodListItem') foodListItem: FoodListItem,
   ) {
-    return 'deprecated route';
+    let rest_id = new mongoose.Types.ObjectId(restId)
+    let item_id = new mongoose.Types.ObjectId(foodListItemId)
+    await this.RestModel.updateOne(
+      {"_id":rest_id,"foodList._id":item_id},
+      { $set: { 'foodList.$': foodListItem } },
+      {runValidators:true}
+    )
+    return await this.RestModel.findById({"_id":rest_id}) 
     // if (foodListItem?._id !== undefined) {
     //   await this.RestModel.updateOne(
     //     { _id: restId, 'foodList._id': foodListItem._id },
@@ -172,6 +181,7 @@ export class RestController {
       { new: true },
     );
   }
+
   @Post('food-list-images')
   @UseInterceptors(AnyFilesInterceptor())
   async uploadFoodListImages(
@@ -199,6 +209,8 @@ export class RestController {
     restFromDb.markModified('foodList');
     return await restFromDb.save();
   }
+
+
   // @Post('move-food-list-item-to-menu')
   // async moveFoodItemToMenu(
   //   @Body('restId') restId: string,
