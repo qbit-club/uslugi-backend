@@ -86,6 +86,14 @@ export class RestController {
     );
     return await this.RestModel.findByIdAndDelete(restId);
   }
+  @Put('change-hide')
+  async hideRest(@Query('rest_id') restId: String) {
+    return await this.RestModel.updateOne(
+      {"_id":restId},
+      [{"$set": {isHidden: {"$not":"$isHidden"}} }],
+      {runValidators:true}
+    );
+  }
 
   @Post('one-by-alias')
   async oneByAlias(@Body('alias') alias: string) {
