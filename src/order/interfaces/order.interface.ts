@@ -1,3 +1,10 @@
+export enum StatusEnum {
+  'created',
+  'inWork',
+  'inDelivery',
+  'delivered'
+}
+
 export interface Order {
   items: [{
     price: number,
@@ -12,5 +19,6 @@ export interface Order {
     comment: string,
     _id: string | undefined
   },
-  date: string
+  date: string,
+  status: StatusEnum
 }
