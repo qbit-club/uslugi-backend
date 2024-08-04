@@ -30,6 +30,7 @@ import { Model } from 'mongoose';
 import { RestClass } from './schemas/rest.schema';
 import { UserClass } from 'src/user/schemas/user.schema';
 import * as mongoose from 'mongoose';
+import { FoodListItemFromDb } from './interfaces/food-list-item-from-db.interface';
 
 @Controller('rest')
 export class RestController {
@@ -126,32 +127,18 @@ export class RestController {
     });
   }
 
-  @Put('/update-food-list')
-  async updateFoodListItem(
+  @Put('/update-meal')
+  async updateMeal(
     @Query('rest_id') restId: string,
-    @Query('item_id') foodListItemId: string,
-    @Body('foodListItem') foodListItem: FoodListItem,
+    @Query('meal_id') mealId: string,
+    @Body('meal') meal: FoodListItemFromDb,
   ) {
-    let rest_id = new mongoose.Types.ObjectId(restId)
-    let item_id = new mongoose.Types.ObjectId(foodListItemId)
     await this.RestModel.updateOne(
-      {"_id":rest_id,"foodList._id":item_id},
-      { $set: { 'foodList.$': foodListItem } },
+      {"_id":restId,"foodList._id":mealId},
+      { $set: { 'foodList.$': meal } },
       {runValidators:true}
     )
-    return await this.RestModel.findById({"_id":rest_id}) 
-    // if (foodListItem?._id !== undefined) {
-    //   await this.RestModel.updateOne(
-    //     { _id: restId, 'foodList._id': foodListItem._id },
-    //     { $set: { 'foodList.$': foodListItem } },
-    //   );
-    //   return await this.RestModel.findById(restId);
-    // }
-    // return await this.RestModel.findByIdAndUpdate(
-    //   restId,
-    //   { $push: { foodList: foodListItem } },
-    //   { new: true },
-    // );
+    return await this.RestModel.findById({"_id":restId}) 
   }
   @Post('/menu')
   async addToMenu(
@@ -239,19 +226,19 @@ export class RestController {
     );
   }
 
-  @Delete('delete-food-list-item')
-  async deleteFromFoodList(
+  @Delete('delete-meal')
+  async deleteMeal(
     @Query('rest_id') restId: string,
-    @Query('food_list_item_id') foodListItemId: string,
+    @Query('meal_id') mealId: string,
   ) {
     await this.RestModel.findByIdAndUpdate(
       restId,
-      { $pull: { menu: foodListItemId } },
+      { $pull: { menu: mealId } },
       { new: true },
     );
     let res= await this.RestModel.findByIdAndUpdate(
       restId,
-      { $pull: { "foodList":{"_id": new mongoose.Types.ObjectId(foodListItemId)}} },
+      { $pull: { "foodList":{"_id": new mongoose.Types.ObjectId(mealId)}} },
       { new: true },
     );
     return res
