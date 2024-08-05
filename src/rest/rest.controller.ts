@@ -38,7 +38,7 @@ export class RestController {
     private RestService: RestService,
     @InjectModel('Rest') private RestModel: Model<RestClass>,
     @InjectModel('User') private UserModel: Model<UserClass>,
-  ) {}
+  ) { }
   @Post()
   async create(@Body('rest') rest: RestFromClient) {
     const restCallback = await this.RestModel.create(rest);
@@ -79,7 +79,7 @@ export class RestController {
   // }
 
   @Get('delete')
-  async deleteRest(@Query('rest_id') restId: String) {
+  async deleteRest(@Query('rest_id') restId: string) {
     await this.UserModel.updateOne(
       { rests: restId },
       { $pull: { rests: restId } },
@@ -87,11 +87,11 @@ export class RestController {
     return await this.RestModel.findByIdAndDelete(restId);
   }
   @Put('change-hide')
-  async hideRest(@Query('rest_id') restId: String) {
+  async hideRest(@Query('rest_id') restId: string) {
     return await this.RestModel.updateOne(
-      {"_id":restId},
-      [{"$set": {isHidden: {"$not":"$isHidden"}} }],
-      {runValidators:true}
+      { "_id": restId },
+      [{ "$set": { isHidden: { "$not": "$isHidden" } } }],
+      { runValidators: true }
     );
   }
 
@@ -142,18 +142,18 @@ export class RestController {
     @Body('meal') meal: FoodListItemFromDb,
   ) {
     await this.RestModel.updateOne(
-      {"_id":restId,"foodList._id":mealId},
+      { "_id": restId, "foodList._id": mealId },
       { $set: { 'foodList.$': meal } },
-      {runValidators:true}
+      { runValidators: true }
     )
-    return await this.RestModel.findById({"_id":restId}) 
+    return await this.RestModel.findById({ "_id": restId })
   }
   @Post('/menu')
   async addToMenu(
     @Body('foodListItemId') foodListItemId: string,
     @Body('restId') restId: string,
   ) {
- 
+
     return await this.RestModel.findByIdAndUpdate(
       restId,
       { $addToSet: { menu: foodListItemId } },
@@ -244,9 +244,9 @@ export class RestController {
       { $pull: { menu: mealId } },
       { new: true },
     );
-    let res= await this.RestModel.findByIdAndUpdate(
+    let res = await this.RestModel.findByIdAndUpdate(
       restId,
-      { $pull: { "foodList":{"_id": new mongoose.Types.ObjectId(mealId)}} },
+      { $pull: { "foodList": { "_id": new mongoose.Types.ObjectId(mealId) } } },
       { new: true },
     );
     return res
