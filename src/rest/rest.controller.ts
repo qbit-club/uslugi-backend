@@ -23,6 +23,7 @@ import type { FoodListItem } from './interfaces/food-list-item.interface';
 // services
 import { RestService } from './rest.service';
 import YaCloud from 'src/s3/bucket';
+const sharp = require('sharp');
 
 // all about MongoDB
 import { InjectModel } from '@nestjs/mongoose';
@@ -37,7 +38,7 @@ export class RestController {
     private RestService: RestService,
     @InjectModel('Rest') private RestModel: Model<RestClass>,
     @InjectModel('User') private UserModel: Model<UserClass>,
-  ) {}
+  ) { }
   @Post()
   async create(@Body('rest') rest: RestFromClient) {
     const restCallback = await this.RestModel.create(rest);
@@ -109,6 +110,12 @@ export class RestController {
     let filenames = [];
 
     for (let file of files) {
+      if (file.originalname.startsWith('logo')) {
+        file.buffer = await sharp(file.buffer).resize(300, 300).toBuffer()
+      }
+      if (file.originalname.startsWith('headerimage')) {
+        file.buffer = await sharp(file.buffer).resize({ width: 1800, withoutEnlargement: true}).toBuffer()
+      }
       let uploadResult = await YaCloud.Upload({
         file,
         path: 'restaurants',
@@ -149,7 +156,7 @@ export class RestController {
     @Body('foodListItemId') foodListItemId: string,
     @Body('restId') restId: string,
   ) {
- 
+
     return await this.RestModel.findByIdAndUpdate(
       restId,
       { $addToSet: { menu: foodListItemId } },
