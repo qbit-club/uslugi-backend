@@ -199,7 +199,7 @@ export class UserController {
         path: 'rest',
         select: ['title', 'phone', 'socialMedia']
       })
-      if (orderFromDb.status.toString() != LAST_STATUS) {
+      if (orderFromDb?.status.toString() != LAST_STATUS) {
         return orderFromDb
       }
     }
