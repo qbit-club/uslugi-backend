@@ -102,7 +102,7 @@ export class AuthController {
 		const { refreshToken } = req.cookies
 
 		await this.AuthService.logout(refreshToken)
-		res.clearCookie('refreshToken').send()
+		res.clearCookie('refreshToken').clearCookie('token').send()
 	}
 
 	@HttpCode(HttpStatus.OK)

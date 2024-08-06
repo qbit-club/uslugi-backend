@@ -23,6 +23,7 @@ import type { RestFromClient } from './interfaces/rest-from-client.interface';
 // services
 import { RestService } from './rest.service';
 import YaCloud from 'src/s3/bucket';
+const sharp = require('sharp');
 
 // all about MongoDB
 import { InjectModel } from '@nestjs/mongoose';
@@ -118,6 +119,12 @@ export class RestController {
     let filenames = [];
 
     for (let file of files) {
+      if (file.originalname.startsWith('logo')) {
+        file.buffer = await sharp(file.buffer).resize(300, 300).toBuffer()
+      }
+      if (file.originalname.startsWith('headerimage')) {
+        file.buffer = await sharp(file.buffer).resize({ width: 1800, withoutEnlargement: true}).toBuffer()
+      }
       let uploadResult = await YaCloud.Upload({
         file,
         path: 'restaurants',
@@ -187,6 +194,7 @@ export class RestController {
     let filenames = [];
 
     for (let file of files) {
+      file.buffer = await sharp(file.buffer).resize(400, 400).toBuffer()
       let uploadResult = await YaCloud.Upload({
         file,
         path: 'restaurants',
