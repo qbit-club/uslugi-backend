@@ -5,11 +5,13 @@ import { UserFromClient } from 'src/user/interfaces/user-from-client.interface';
 import { User } from 'src/user/interfaces/user.interface';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
+import { MailService } from 'src/mail/mail.service';
 
 @Controller('auth')
 export class AuthController {
 	constructor(
-		private AuthService: AuthService
+		private AuthService: AuthService,
+		private mailService: MailService
 	) { }
 
 	@HttpCode(HttpStatus.CREATED)
@@ -19,6 +21,7 @@ export class AuthController {
 		@Body() user: User
 	) {
 		const userData = await this.AuthService.registration(user)
+		await this.mailService.sendUserConfirmation(user);
 
 		let refreshToken = userData.refreshToken
 		delete userData.refreshToken
