@@ -29,7 +29,7 @@ export class AuthService {
     const password = await bcrypt.hash(user.password, 3)
     const created_user = (await this.UserModel.create(Object.assign(user, { password }))).toObject()
 
-    const tokens = this.TokenService.generateTokens(created_user)
+    const tokens = this.TokenService.generateTokens({ _id: created_user._id, password: created_user.password })
     await this.TokenService.saveToken(tokens.refreshToken)
 
     return {
@@ -54,7 +54,7 @@ export class AuthService {
       throw ApiError.BadRequest('Неверный пароль')
     }
 
-    const tokens = this.TokenService.generateTokens(user)
+    const tokens = this.TokenService.generateTokens({ _id: user._id, password: user.password })
     await this.TokenService.saveToken(tokens.refreshToken)
 
     return {
@@ -66,13 +66,13 @@ export class AuthService {
   async refresh(refreshToken: string, accessToken: string) {
     let userData: any; // jwt payload
     let user: any; // object to return
-    
+
     // проверить, валиден ли ещё accessToken
     userData = this.TokenService.validateAccessToken(accessToken)
-    
+
     if (userData != null) {
       user = (await this.UserModel.findById(userData._id)).toObject()
-      
+
       return {
         refreshToken: refreshToken,
         accessToken: accessToken,
@@ -82,25 +82,25 @@ export class AuthService {
     // если accessToken не валиден - пройти авторизацию с refreshToken и создать новый accessToken
 
     // если нет refreshToken выкидываем пользователя
-    if (!refreshToken) {      
+    if (!refreshToken) {
       throw ApiError.UnauthorizedError()
     }
 
     userData = this.TokenService.validateRefreshToken(refreshToken)
     const tokenFromDb = await this.TokenService.findToken(refreshToken)
     // если refreshToken сдох, то выкидываем пользователя
-    if (!userData || !tokenFromDb) {    
+    if (!userData || !tokenFromDb) {
       throw ApiError.UnauthorizedError()
     }
 
     user = (await this.UserModel.findById(userData._id)).toObject()
 
-    if (userData.password !== user.password) {      
+    if (userData.password !== user.password) {
       throw ApiError.AccessDenied('Аутентификация провалена. Пароль изменен')
     }
     // new accessToken, чтобы пользователь мог зайти в
     // систему ближайшие 15 минут без использоватния refreshToken
-    const newAccessToken = this.TokenService.generateAccessToken(user)
+    const newAccessToken = this.TokenService.generateAccessToken({ _id: user._id, password: user.password })
 
     return {
       refreshToken: refreshToken,
@@ -116,7 +116,7 @@ export class AuthService {
       const hashPassword = await bcrypt.hash(password, 3)
       const user = await this.UserModel.findByIdAndUpdate(user_id, { password: hashPassword })
 
-      const tokens = this.TokenService.generateTokens(user)
+      const tokens = this.TokenService.generateTokens({ _id: user._id, password: user.password })
       await this.TokenService.saveToken(tokens.refreshToken)
 
       return {
