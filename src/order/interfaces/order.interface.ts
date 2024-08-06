@@ -4,12 +4,16 @@ export enum StatusEnum {
   'inDelivery',
   'delivered'
 }
+// последний статус заказа, который определяет, закрыт ли заказ
+//! уже используется, поэтому менять, когда меняется последний статус
+export const LAST_STATUS: string = 'delivered'
 
 export interface Order {
   items: [{
     price: number,
     count: number,
-    menuItem: string
+    menuItem: string,
+    images: string[],
   }]
   rest: string,
   user: {

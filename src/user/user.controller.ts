@@ -10,29 +10,40 @@ import {
   UseGuards,
   Patch,
 } from '@nestjs/common';
+
+import { SomeAdminGuard } from 'src/admin/some_admin.guard';
+import { RolesService } from 'src/roles/roles.service';
+import { GlobalAdminGuard } from 'src/admin/global_admin.guard';
+
+import { UserService } from './user.service';
+import ApiError from 'src/exceptions/errors/api-error';
+
+
+// types
+import { Role } from '../roles/interfaces/role.interface';
+import { UserFromClient } from './interfaces/user-from-client.interface';
+import RequestWithUser from 'src/types/request-with-user.type';
+
+import { LAST_STATUS } from 'src/order/interfaces/order.interface';
+
+// all aboout MongoDB
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import mongoose from 'mongoose';
-import { SomeAdminGuard } from 'src/admin/some_admin.guard';
-import ApiError from 'src/exceptions/errors/api-error';
-import { RolesService } from 'src/roles/roles.service';
-import RequestWithUser from 'src/types/request-with-user.type';
-import { UserFromClient } from './interfaces/user-from-client.interface';
 import { UserClass } from './schemas/user.schema';
 import { RestClass } from '../rest/schemas/rest.schema';
-import { UserService } from './user.service';
-import { GlobalAdminGuard } from 'src/admin/global_admin.guard';
-import { Role } from '../roles/interfaces/role.interface';
+import { OrderClass } from 'src/order/schemas/order.schema';
+
 
 @Controller('user')
 export class UserController {
   constructor(
     @InjectModel('Rest') private RestModel: Model<RestClass>,
     @InjectModel('User') private UserModel: Model<UserClass>,
+    @InjectModel('Order') private OrderModel: Model<OrderClass>,
 
     private UserService: UserService,
     private RolesService: RolesService,
-  ) {}
+  ) { }
 
   @HttpCode(HttpStatus.OK)
   @Get('get-by-id')
@@ -107,7 +118,7 @@ export class UserController {
             managerIn: chosen_rest,
             roles: "manager"
           },
-         
+
         },
       );
     }
@@ -172,7 +183,27 @@ export class UserController {
       path: 'managerIn',
       select: ['title']
     })
-    
+
     return userFromDb.managerIn
+  }
+
+  @Get('tmp-order')
+  async getTempOrder(
+    @Query('user_id') userId: string
+  ) {
+    let userFromDb = await this.UserModel.findById(userId)
+    const orders = userFromDb.orders.reverse()
+
+    for (let orderObjectId of orders) {
+      let orderFromDb = await this.OrderModel.findById(orderObjectId).populate({
+        path: 'rest',
+        select: ['title', 'phone', 'socialMedia']
+      })
+      if (orderFromDb?.status.toString() != LAST_STATUS) {
+        return orderFromDb
+      }
+    }
+
+    return {}
   }
 }
