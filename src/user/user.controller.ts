@@ -181,7 +181,7 @@ export class UserController {
   ) {
     let userFromDb = await this.UserModel.findById(userId).populate({
       path: 'managerIn',
-      select: ['title']
+      select: ['title','isHidden']
     })
 
     return userFromDb.managerIn

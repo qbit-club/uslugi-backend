@@ -58,11 +58,18 @@ export class RestController {
   }
   @Get('all')
   async getAll() {
+    return await this.RestModel.find({isHidden:false});
+  }
+
+  @Get('all-with-hidden')
+  async getAllWithHidden() {
     return await this.RestModel.find({});
   }
+
   @Get('rests-name')
   async getRestsName() {
-    return await this.RestModel.find({}, { title: 1, managers: 1 });
+    let x = await this.RestModel.find({}, { title: 1, managers: 1 });
+    return x
   }
 
   // @HttpCode(HttpStatus.OK)
