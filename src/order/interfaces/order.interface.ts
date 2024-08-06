@@ -12,7 +12,8 @@ export interface Order {
   items: [{
     price: number,
     count: number,
-    menuItem: string
+    menuItem: string,
+    images: string[],
   }]
   rest: string,
   user: {

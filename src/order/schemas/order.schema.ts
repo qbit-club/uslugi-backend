@@ -16,6 +16,7 @@ export class OrderClass {
       price: number;
       count: number;
       menuItemId: string;
+      images: string[];
     },
   ];
 
