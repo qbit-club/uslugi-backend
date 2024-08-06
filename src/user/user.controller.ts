@@ -193,17 +193,17 @@ export class UserController {
   ) {
     let userFromDb = await this.UserModel.findById(userId)
     const orders = userFromDb.orders.reverse()
-
+    let ordersToReturn = []
     for (let orderObjectId of orders) {
       let orderFromDb = await this.OrderModel.findById(orderObjectId).populate({
         path: 'rest',
         select: ['title', 'phone', 'socialMedia']
       })
-      if (orderFromDb?.status.toString() != LAST_STATUS) {
-        return orderFromDb
+      if (orderFromDb?._id && orderFromDb?.status.toString() != LAST_STATUS) {
+        ordersToReturn.push(orderFromDb)
       }
     }
 
-    return {}
+    return ordersToReturn
   }
 }
