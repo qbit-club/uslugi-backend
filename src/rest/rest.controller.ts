@@ -189,6 +189,7 @@ export class RestController {
     let filenames = [];
 
     for (let file of files) {
+      file.buffer = await sharp(file.buffer).resize(400, 400).toBuffer()
       let uploadResult = await YaCloud.Upload({
         file,
         path: 'restaurants',
