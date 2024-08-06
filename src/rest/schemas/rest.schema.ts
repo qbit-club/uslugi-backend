@@ -106,12 +106,18 @@ export class RestClass {
     required: false
   })
   managers: string[];
-  
+
   @Prop({
     type: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order' }],
     default: [],
   })
   orders: mongoose.Schema.Types.ObjectId[];
+
+  @Prop({
+    type: Boolean,
+    required: false
+  })
+  isHidden: false;
 }
 
 export const RestSchema = SchemaFactory.createForClass(RestClass);
