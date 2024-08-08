@@ -105,16 +105,15 @@ export class AuthController {
 		res.clearCookie('refreshToken').clearCookie('token').send()
 	}
 
-	@HttpCode(HttpStatus.OK)
 	@Post('reset-password')
 	async resetPassword(
 		@Res() res: Response,
 		@Body('password') password: string,
 		@Body('token') token: string,
-		@Body('user_id') user_id: string
-	) {
-		const userData = await this.AuthService.resetPassword(password, token, user_id)
-
+		@Body('userId') userId: string
+	) {		
+		const userData = await this.AuthService.resetPassword(password, token, userId)
+		
 		let refreshToken = userData.refreshToken
 		delete userData.refreshToken
 

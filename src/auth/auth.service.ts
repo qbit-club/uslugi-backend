@@ -110,17 +110,32 @@ export class AuthService {
       user: user
     }
   }
+  
+  async validateEnterToResetPassword(user_id: any, token: string) {    
+    let candidate = await this.UserModel.findById(user_id)
+    
+    if (!candidate._id) throw ApiError.BadRequest('Пользователь с таким _id не найден')
 
-  async resetPassword(password: string, token: string, user_id: any) {
+    let secret = process.env.JWT_RESET_SECRET + candidate.password
+    
+    let result = this.TokenService.validateResetToken(token, secret)
+  console.log(result);
+  
+    if (!result) throw ApiError.AccessDenied()
+
+    return result
+  }
+  
+  async resetPassword(password: string, token: string, userId: string) {
     try {
-      await this.validateEnterToResetPassword(user_id, token)
+      await this.validateEnterToResetPassword(userId, token)
 
       const hashPassword = await bcrypt.hash(password, 3)
-      const user = await this.UserModel.findByIdAndUpdate(user_id, { password: hashPassword })
+      const user = await this.UserModel.findByIdAndUpdate(userId, { password: hashPassword })
 
       const tokens = this.TokenService.generateTokens({ _id: user._id, password: user.password })
       await this.TokenService.saveToken(tokens.refreshToken)
-
+      
       return {
         ...tokens,
         user: user
@@ -128,18 +143,6 @@ export class AuthService {
     } catch (error) {
       return null
     }
-  }
-
-  async validateEnterToResetPassword(user_id: any, token: string) {
-    let candidate = await this.UserModel.findById(user_id)
-    if (!candidate) throw ApiError.BadRequest('Пользователь с таким _id не найден')
-
-    let secret = process.env.JWT_RESET_SECRET + candidate.password
-    let result = this.TokenService.validateResetToken(token, secret)
-
-    if (!result) throw ApiError.AccessDenied()
-
-    return result
   }
 
   async sendResetLink(email: string) {

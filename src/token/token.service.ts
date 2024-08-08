@@ -14,10 +14,10 @@ export class TokenService {
 		private jwtService: JwtService
 	) { }
 
-	validateResetToken(token: string, secret: string): User {
+	validateResetToken(token: string, secret: string): any {
 		try {
-			return jwt.verify(token, secret) as User
-		} catch {
+			return jwt.verify(token, secret)
+		} catch {			
 			return null
 		}
 	}
