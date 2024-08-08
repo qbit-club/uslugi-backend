@@ -267,4 +267,21 @@ export class RestController {
     return res
   }
 
+  @Put('add-email')
+  async addEmail(
+    @Body('email') email: string,
+    @Body('mailType') mailType: string,
+    @Body('restId') restId: string
+  ) {
+    let restFromDb = await this.RestModel.findById(restId);
+    
+    if (restFromDb.mailTo[mailType].includes(email)) {
+      throw ApiError.BadRequest(`${email} уже в списке`);
+    }
+    restFromDb.mailTo[mailType].push(email)
+    restFromDb.markModified('mailTo');
+
+    return await restFromDb.save()
+  }
+
 }

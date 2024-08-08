@@ -167,12 +167,16 @@ export class UserController {
     @Body('userId') userId: string,
     @Body('restId') restId: string,
   ) {
-    if (!restId) return await this.UserModel.findById(userId);
-    return await this.UserModel.findByIdAndUpdate(
-      userId,
-      { managingRest: restId },
-      { new: true },
-    );
+    if (!restId) return { user: await this.UserModel.findById(userId) }
+
+    return {
+      user: await this.UserModel.findByIdAndUpdate(
+        userId,
+        { managingRest: restId },
+        { new: true },
+      ),
+      rest: await this.RestModel.findById(restId)
+    }
   }
 
   @Get('manager-in-array')
@@ -181,7 +185,7 @@ export class UserController {
   ) {
     let userFromDb = await this.UserModel.findById(userId).populate({
       path: 'managerIn',
-      select: ['title','isHidden']
+      select: ['title', 'isHidden']
     })
 
     return userFromDb.managerIn

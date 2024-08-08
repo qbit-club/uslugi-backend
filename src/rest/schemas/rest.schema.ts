@@ -118,6 +118,20 @@ export class RestClass {
     required: false
   })
   isHidden: false;
+
+  @Prop({
+    type: Object,
+    required: false,
+    default: {
+      order: [],
+      // с добавлением новых полей тут тоже надо менять
+    }
+  })
+  // не забываем обновить rest-from-db.interface.ts на клиенте, когда добавляем новые типы
+  mailTo: {
+    order: string[],
+    // добавляем новые типы уведомлений так же, как и order
+  }
 }
 
 export const RestSchema = SchemaFactory.createForClass(RestClass);
