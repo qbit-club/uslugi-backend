@@ -26,7 +26,7 @@ export class MailService {
     return await this.mailerService.sendMail({
       to: userEmails,
       from: "Команда Глазов-есть <plpo@ya.ru>", // override default from
-      subject: 'Спасибо за заказ в Глазов-есть!',
+      subject: 'Новый заказ в Глазов-есть!',
       template: 'order', // `.hbs` extension is appended automatically
       context: { order: order._doc }
     });
