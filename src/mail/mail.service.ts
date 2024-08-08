@@ -31,4 +31,14 @@ export class MailService {
       context: { order: order._doc }
     });
   }
+
+  public async sendResetLink(link: string, email: string) {
+    return await this.mailerService.sendMail({
+      to: email,
+      from: "Команда Глазов-есть <plpo@ya.ru>", // override default from
+      subject: 'Восстановление пароля',
+      template: 'reset-pasword', // `.hbs` extension is appended automatically
+      context: { link }
+    });
+  }
 }

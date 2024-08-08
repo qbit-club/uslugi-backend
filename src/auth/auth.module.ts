@@ -5,16 +5,15 @@ import { TokenModule } from 'src/token/token.module';
 import UserModel from 'src/user/models/user.model';
 import { JwtModule } from '@nestjs/jwt';
 import { RolesService } from 'src/roles/roles.service';
-import { MailModule } from 'src/mail/mail.module';
+import { MailService } from 'src/mail/mail.service';
 
 @Module({
   imports: [
     TokenModule,
     UserModel,
     JwtModule,
-    MailModule
   ],
   controllers: [AuthController],
-  providers: [AuthService, RolesService]
+  providers: [AuthService, RolesService, MailService]
 })
-export class AuthModule {}
+export class AuthModule { }

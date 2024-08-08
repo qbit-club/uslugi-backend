@@ -8,13 +8,15 @@ import { User } from 'src/user/interfaces/user.interface'
 import { UserFromClient } from 'src/user/interfaces/user-from-client.interface'
 import { RolesService } from 'src/roles/roles.service'
 import * as bcrypt from 'bcryptjs'
+import { MailService } from 'src/mail/mail.service'
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectModel('User') private UserModel: Model<UserClass>,
     private TokenService: TokenService,
-    private RolesService: RolesService
+    private RolesService: RolesService,
+    private mailService: MailService,
   ) { }
 
   async registration(user: User | UserFromClient) {
@@ -146,12 +148,12 @@ export class AuthService {
       throw ApiError.BadRequest('Пользователь с таким email не найден')
 
     const secret = process.env.JWT_RESET_SECRET + candidate.password
-    const token = this.TokenService.createResetToken(candidate, secret)
+    const token = this.TokenService.createResetToken({ _id: candidate._id, password: candidate.password }, secret)
 
     const link = process.env.CLIENT_URL + `/forgot-password?user_id=${candidate._id}&token=${token}`
 
-    //sendMail({ link: link }, 'reset-password.hbs', [candidate.email], 'single')
-
+    await this.mailService.sendResetLink(link, email)
+  
     return link
   }
 
