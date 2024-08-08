@@ -67,7 +67,7 @@ export class AuthController {
 		@Res() res: Response,
 	) {
 		const { refreshToken, token } = req.cookies
-		
+
 		// проверить, валиден ещё accessToken
 		// если accessToken не валиден - сделать новый с помощью refreshToken
 		const userData = await this.AuthService.refresh(refreshToken, token)
@@ -111,9 +111,9 @@ export class AuthController {
 		@Body('password') password: string,
 		@Body('token') token: string,
 		@Body('userId') userId: string
-	) {		
+	) {
 		const userData = await this.AuthService.resetPassword(password, token, userId)
-		
+
 		let refreshToken = userData.refreshToken
 		delete userData.refreshToken
 
@@ -122,6 +122,14 @@ export class AuthController {
 			refreshToken,
 			{
 				maxAge: 30 * 24 * 60 * 60 * 1000,
+				httpOnly: true,
+				secure: eval(process.env.HTTPS)
+			}
+		).cookie(
+			'token',
+			userData.accessToken,
+			{
+				maxAge: 15 * 60 * 1000,
 				httpOnly: true,
 				secure: eval(process.env.HTTPS)
 			}
