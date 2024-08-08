@@ -3,7 +3,6 @@ import { Injectable } from '@nestjs/common';
 
 // types
 import type { User } from 'src/user/interfaces/user.interface'
-import type { OrderFromDb } from 'src/order/interfaces/order-from-db.interface';
 
 @Injectable()
 export class MailService {
@@ -24,13 +23,12 @@ export class MailService {
   }
 
   public async sendOrderNotifications(userEmails: string[], order: any) {
-    delete order._id
     return await this.mailerService.sendMail({
       to: userEmails,
-      from: '"Команда проекта" <plpo@ya.ru>', // override default from
+      from: "Команда Глазов-есть <plpo@ya.ru>", // override default from
       subject: 'Спасибо за заказ в Глазов-есть!',
       template: 'order', // `.hbs` extension is appended automatically
-      context: { order }
+      context: { order: order._doc }
     });
   }
 }
