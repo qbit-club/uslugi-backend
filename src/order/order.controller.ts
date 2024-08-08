@@ -1,5 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Put, Query } from '@nestjs/common';
 import { OrderService } from './order.service';
+import { MailService } from '../mail/mail.service';
 
 // types
 import type { Order } from './interfaces/order.interface'
@@ -11,11 +12,13 @@ import { OrderClass } from './schemas/order.schema';
 import * as mongoose from 'mongoose';
 import { UserClass } from 'src/user/schemas/user.schema';
 import { RestClass } from 'src/rest/schemas/rest.schema';
+import { OrderFromDb } from './interfaces/order-from-db.interface';
 
 @Controller('order')
 export class OrderController {
   constructor(
     private readonly orderService: OrderService,
+    private readonly mailService: MailService,
     @InjectModel('Order') private OrderModel: Model<OrderClass>,
     @InjectModel('User') private UserModel: Model<UserClass>,
     @InjectModel('Rest') private RestModel: Model<RestClass>,
@@ -25,8 +28,10 @@ export class OrderController {
   async create(@Body('order') order: Order) {
     let orderFromDb = await this.OrderModel.create(order)
 
-    await this.RestModel.findByIdAndUpdate(orderFromDb.rest, { $push: { orders: orderFromDb._id } })
-
+    let restFromDb = await this.RestModel.findByIdAndUpdate(orderFromDb.rest, { $push: { orders: orderFromDb._id } })
+    
+    let mailRes = await this.mailService.sendOrderNotifications(restFromDb.mailTo.order, orderFromDb)
+    
     return {
       user: order.user?._id ? await this.UserModel.findByIdAndUpdate(order.user?._id, { $push: { orders: orderFromDb._id } }, { new: true }) : order.user,
       order: orderFromDb
