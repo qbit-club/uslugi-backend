@@ -58,7 +58,7 @@ export class RestController {
   }
   @Get('all')
   async getAll() {
-    return await this.RestModel.find({isHidden:false});
+    return await this.RestModel.find({ isHidden: false });
   }
 
   @Get('all-with-hidden')
@@ -130,7 +130,7 @@ export class RestController {
         file.buffer = await sharp(file.buffer).resize(300, 300).toBuffer()
       }
       if (file.originalname.startsWith('headerimage')) {
-        file.buffer = await sharp(file.buffer).resize({ width: 1800, withoutEnlargement: true}).toBuffer()
+        file.buffer = await sharp(file.buffer).resize({ width: 1800, withoutEnlargement: true }).toBuffer()
       }
       let uploadResult = await YaCloud.Upload({
         file,
@@ -274,7 +274,7 @@ export class RestController {
     @Body('restId') restId: string
   ) {
     let restFromDb = await this.RestModel.findById(restId);
-    
+
     if (restFromDb.mailTo[mailType].includes(email)) {
       throw ApiError.BadRequest(`${email} уже в списке`);
     }
@@ -284,4 +284,22 @@ export class RestController {
     return await restFromDb.save()
   }
 
+  @Put('delete-email')
+  async deleteEmail(
+    @Body('email') email: string,
+    @Body('mailType') mailType: string,
+    @Body('restId') restId: string
+  ) {
+    let restFromDb = await this.RestModel.findById(restId);
+    
+    for (let i = 0; i < restFromDb.mailTo[mailType].length; i++) {
+      if (restFromDb.mailTo[mailType][i] == email) {
+        restFromDb.mailTo[mailType].splice(i, 1)
+        break;
+      }
+    }
+
+    restFromDb.markModified('mailTo');
+    return await restFromDb.save()
+  }
 }
