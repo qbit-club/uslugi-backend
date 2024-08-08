@@ -1,9 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Put, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Put,
+  Query,
+} from '@nestjs/common';
 import { OrderService } from './order.service';
 import { MailService } from '../mail/mail.service';
 
 // types
-import type { Order } from './interfaces/order.interface'
+import type { Order } from './interfaces/order.interface';
 
 // all about MongoDB
 import { InjectModel } from '@nestjs/mongoose';
@@ -13,6 +22,7 @@ import * as mongoose from 'mongoose';
 import { UserClass } from 'src/user/schemas/user.schema';
 import { RestClass } from 'src/rest/schemas/rest.schema';
 import { OrderFromDb } from './interfaces/order-from-db.interface';
+import { int } from 'aws-sdk/clients/datapipeline';
 
 @Controller('order')
 export class OrderController {
@@ -22,28 +32,42 @@ export class OrderController {
     @InjectModel('Order') private OrderModel: Model<OrderClass>,
     @InjectModel('User') private UserModel: Model<UserClass>,
     @InjectModel('Rest') private RestModel: Model<RestClass>,
-  ) { }
+  ) {}
 
   @Post()
   async create(@Body('order') order: Order) {
-    let orderFromDb = await this.OrderModel.create(order)
+    let orderFromDb = await this.OrderModel.create(order);
 
-    let restFromDb = await this.RestModel.findByIdAndUpdate(orderFromDb.rest, { $push: { orders: orderFromDb._id } })
-    
-    let mailRes = await this.mailService.sendOrderNotifications(restFromDb.mailTo.order, orderFromDb)
-    
+    let restFromDb = await this.RestModel.findByIdAndUpdate(orderFromDb.rest, {
+      $push: { orders: orderFromDb._id },
+    });
+
+    let mailRes = await this.mailService.sendOrderNotifications(
+      restFromDb.mailTo.order,
+      orderFromDb,
+    );
+
     return {
-      user: order.user?._id ? await this.UserModel.findByIdAndUpdate(order.user?._id, { $push: { orders: orderFromDb._id } }, { new: true }) : order.user,
-      order: orderFromDb
-    }
+      user: order.user?._id
+        ? await this.UserModel.findByIdAndUpdate(
+            order.user?._id,
+            { $push: { orders: orderFromDb._id } },
+            { new: true },
+          )
+        : order.user,
+      order: orderFromDb,
+    };
   }
   @Post('order-by-orderId')
   async getOrdersByOrdersId(@Body('ordersId') ordersId: string[]) {
     try {
-      const orders = await this.OrderModel.find({ _id: { $in: ordersId } }, { user: 0 }).populate('rest', 'title');
+      const orders = await this.OrderModel.find(
+        { _id: { $in: ordersId } },
+        { user: 0 },
+      ).populate('rest', 'title');
       const grouped: { [key: string]: any[] } = {};
-      orders.forEach(order => {
-        const rest = order.rest.title || "Без названия";
+      orders.forEach((order) => {
+        const rest = order.rest.title || 'Без названия';
         if (!grouped[rest]) {
           grouped[rest] = [];
         }
@@ -51,64 +75,48 @@ export class OrderController {
       });
       return Object.keys(grouped)
         .sort()
-        .map(rest => ({
+        .map((rest) => ({
           rest,
-          orders: grouped[rest]
+          orders: grouped[rest],
         }));
       return grouped;
     } catch (error) {
       console.error(error);
-
     }
   }
   /**
-   * 
-   * @param restId 
+   *
+   * @param restId
    * @returns orders конкретного rest с полной информацией о каждом его поле(populated)
    */
   @Get('by-rest-id')
   async getOrdersByRestId(
-    @Query('rest_id') restId: string
+    @Query('rest_id') restId: string,
+    @Query('page') page: string = '1',
   ) {
+    let limitNumber: int = 30;
+    const pageNumber = parseInt(page, 10);
+
+    // Вычисляем, сколько записей нужно пропустить
+    const skip = (pageNumber - 1) * limitNumber;
+
     let ordersFromDb = await this.OrderModel.find({ rest: restId })
       .populate({
         path: 'user',
-        select: ['name', 'email']
+        select: ['name', 'email'],
       })
-    // foodList нужен, чтобы получить информацию по 
-    // выбранным пользователем компонентам меню
-    // let { foodList } = await this.RestModel.findById(restId)
+      .sort({ date: -1 }) // Сортируем по дате в порядке убывания
+      .skip(skip) // Пропускаем записи для предыдущих страниц
+      .limit(limitNumber); // Ограничиваем количество записей
 
-    // let result = []
-    // // делаем то же самое, что и populate с menuItem у order.items
-    // for (let order of ordersFromDb) {
-    //   let tmp = {
-    //     user: order.user,
-    //     items: []
-    //   }
-    //   for (let item of order.items) {
-
-    //     for (let fl of foodList) {
-    //       if (item.menuItemId == fl._id?.toString()) {
-    //         tmp.items.push({
-    //           price: item.price,
-    //           count: item.count,
-    //           menuItem: fl
-    //         })            
-    //         break;
-    //       }
-    //     }
-    //   }
-    //   result.push(tmp)
-    // }
-    return ordersFromDb
+    return ordersFromDb;
   }
 
   @Put('status')
   async changeStatus(
     @Body('orderId') orderId: string,
-    @Body('status') status: string
+    @Body('status') status: string,
   ) {
-    return await this.OrderModel.findByIdAndUpdate(orderId, { status })
+    return await this.OrderModel.findByIdAndUpdate(orderId, { status });
   }
 }
