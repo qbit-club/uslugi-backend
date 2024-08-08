@@ -64,7 +64,7 @@ export class OrderController {
       const orders = await this.OrderModel.find(
         { _id: { $in: ordersId } },
         { user: 0 },
-      ).populate('rest', 'title');
+      ).populate('rest', 'title').sort({ date: -1 })
       const grouped: { [key: string]: any[] } = {};
       orders.forEach((order) => {
         const rest = order.rest.title || 'Без названия';
@@ -74,7 +74,6 @@ export class OrderController {
         grouped[rest].push(order);
       });
       return Object.keys(grouped)
-        .sort()
         .map((rest) => ({
           rest,
           orders: grouped[rest],
