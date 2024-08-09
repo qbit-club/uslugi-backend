@@ -36,28 +36,35 @@ export class OrderController {
 
   @Post()
   async create(@Body('order') order: Order) {
-    let orderFromDb = await this.OrderModel.create(order);
+    try {
+        let orderFromDb = await this.OrderModel.create(order);
 
-    let restFromDb = await this.RestModel.findByIdAndUpdate(orderFromDb.rest, {
-      $push: { orders: orderFromDb._id },
-    });
+        let restFromDb = await this.RestModel.findByIdAndUpdate(orderFromDb.rest, {
+            $push: { orders: orderFromDb._id },
+        });
 
-    let mailRes = await this.mailService.sendOrderNotifications(
-      restFromDb.mailTo.order,
-      orderFromDb,
-    );
+        let mailRes = await this.mailService.sendOrderNotifications(
+            restFromDb.mailTo.order,
+            orderFromDb,
+        );
 
-    return {
-      user: order.user?._id
-        ? await this.UserModel.findByIdAndUpdate(
-            order.user?._id,
-            { $push: { orders: orderFromDb._id } },
-            { new: true },
-          )
-        : order.user,
-      order: orderFromDb,
-    };
-  }
+        const userUpdate = order.user?._id
+            ? await this.UserModel.findByIdAndUpdate(
+                order.user?._id,
+                { $push: { orders: orderFromDb._id } },
+                { new: true },
+            )
+            : order.user;
+
+        return {
+            user: userUpdate,
+            order: orderFromDb,
+        };
+    } catch (error) {
+        console.error('Error creating order:', error);
+        throw new Error('Failed to create order');
+    }
+}
   @Post('order-by-orderId')
   async getOrdersByOrdersId(@Body('ordersId') ordersId: string[]) {
     try {
