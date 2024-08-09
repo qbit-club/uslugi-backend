@@ -80,12 +80,12 @@ export class AuthController {
 				httpOnly: true,
 				secure: eval(process.env.HTTPS)
 			}
-		)
+		)		
 		res.cookie(
 			'token',
 			userData.accessToken,
 			{
-				maxAge: 15 * 60 * 1000,
+				maxAge: 7 * 24 * 60 * 60 * 1000,
 				httpOnly: true,
 				secure: eval(process.env.HTTPS)
 			}
@@ -129,7 +129,7 @@ export class AuthController {
 			'token',
 			userData.accessToken,
 			{
-				maxAge: 15 * 60 * 1000,
+				maxAge: 7 * 24 * 60 * 60 * 1000,
 				httpOnly: true,
 				secure: eval(process.env.HTTPS)
 			}

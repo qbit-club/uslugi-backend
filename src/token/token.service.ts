@@ -24,7 +24,7 @@ export class TokenService {
 
 	createResetToken(payload: any, secret: string): string {
 		try {
-			return jwt.sign(payload, secret, { expiresIn: '15m' })
+			return jwt.sign(payload, secret, { expiresIn: '7d' })
 		} catch {
 			return null
 		}
@@ -32,7 +32,7 @@ export class TokenService {
 
 	generateTokens(payload: any): { accessToken: string, refreshToken: string } {
 		try {
-			const accessToken = jwt.sign(payload, process.env.JWT_ACCESS_SECRET, { expiresIn: '15m' })
+			const accessToken = jwt.sign(payload, process.env.JWT_ACCESS_SECRET, { expiresIn: '7d' })
 			const refreshToken = jwt.sign(payload, process.env.JWT_REFRESH_SECRET, { expiresIn: '30d' })
 
 			return { accessToken, refreshToken }
@@ -43,7 +43,7 @@ export class TokenService {
 
 	generateAccessToken(payload: any): string {
 		try {
-			const accessToken = jwt.sign(payload, process.env.JWT_ACCESS_SECRET, { expiresIn: '15m' })
+			const accessToken = jwt.sign(payload, process.env.JWT_ACCESS_SECRET, { expiresIn: '7d' })
 			return accessToken
 		} catch (error) {
 			return null
