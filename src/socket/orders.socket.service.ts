@@ -2,7 +2,7 @@ import { ConnectedSocket, MessageBody, OnGatewayConnection, SubscribeMessage, We
 
 @WebSocketGateway({
   cors: {
-    origin: [process.env.CLIENT_URL, 'http://localhost:3000', 'https://glazovest.ru']
+    origin: [process.env.CLIENT_URL, 'http://localhost:3000', 'https://glazovest.ru', 'https://api.glazovest.ru']
   },
   namespace: 'orders'
 })
