@@ -37,41 +37,47 @@ export class OrderController {
   @Post()
   async create(@Body('order') order: Order) {
     try {
-        let orderFromDb = await this.OrderModel.create(order);
+      let orderFromDb = await this.OrderModel.create(order);
 
-        let restFromDb = await this.RestModel.findByIdAndUpdate(orderFromDb.rest, {
-            $push: { orders: orderFromDb._id },
-        });
+      let restFromDb = await this.RestModel.findByIdAndUpdate(
+        orderFromDb.rest,
+        {
+          $push: { orders: orderFromDb._id },
+        },
+      );
+      if (restFromDb.mailTo.order.length) {
+        this.mailService.sendOrderNotifications(
+          restFromDb.mailTo.order,
+          orderFromDb,
+        );
+      }
 
-        // let mailRes = await this.mailService.sendOrderNotifications(
-        //     restFromDb.mailTo.order,
-        //     orderFromDb,
-        // );
+      const userUpdate = order.user?._id
+        ? await this.UserModel.findByIdAndUpdate(
+            order.user?._id,
+            { $push: { orders: orderFromDb._id } },
+            { new: true },
+          )
+        : order.user;
 
-        const userUpdate = order.user?._id
-            ? await this.UserModel.findByIdAndUpdate(
-                order.user?._id,
-                { $push: { orders: orderFromDb._id } },
-                { new: true },
-            )
-            : order.user;
-
-        return {
-            user: userUpdate,
-            order: orderFromDb,
-        };
+      return {
+        user: userUpdate,
+        order: orderFromDb,
+      };
     } catch (error) {
-        console.error('Error creating order:', error);
-        throw new Error('Failed to create order');
+      console.error('Error creating order:', error);
+      throw new Error('Failed to create order');
     }
-}
+  }
   @Post('order-by-orderId')
   async getOrdersByOrdersId(@Body('ordersId') ordersId: string[]) {
     try {
       const orders = await this.OrderModel.find(
         { _id: { $in: ordersId } },
         { user: 0 },
-      ).populate('rest', 'title').sort({ date: -1 })
+      )
+        .populate('rest', 'title')
+        .sort({ date: -1 });
       const grouped: { [key: string]: any[] } = {};
       orders.forEach((order) => {
         const rest = order.rest.title || 'Без названия';
@@ -80,11 +86,10 @@ export class OrderController {
         }
         grouped[rest].push(order);
       });
-      return Object.keys(grouped)
-        .map((rest) => ({
-          rest,
-          orders: grouped[rest],
-        }));
+      return Object.keys(grouped).map((rest) => ({
+        rest,
+        orders: grouped[rest],
+      }));
       return grouped;
     } catch (error) {
       console.error(error);
