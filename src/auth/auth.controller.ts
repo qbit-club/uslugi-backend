@@ -31,7 +31,7 @@ export class AuthController {
 			refreshToken,
 			{
 				maxAge: 30 * 24 * 60 * 60 * 1000,
-				httpOnly: true,
+				httpOnly: !eval(process.env.HTTPS),
 				secure: eval(process.env.HTTPS)
 			}
 		).json(userData)
@@ -54,7 +54,7 @@ export class AuthController {
 			refreshToken,
 			{
 				maxAge: 30 * 24 * 60 * 60 * 1000,
-				httpOnly: true,
+				httpOnly: !eval(process.env.HTTPS),
 				secure: eval(process.env.HTTPS)
 			}
 		).json(userData)
@@ -77,7 +77,7 @@ export class AuthController {
 			refreshToken,
 			{
 				maxAge: 30 * 24 * 60 * 60 * 1000,
-				httpOnly: true,
+				httpOnly: !eval(process.env.HTTPS),
 				secure: eval(process.env.HTTPS)
 			}
 		)		
@@ -86,7 +86,7 @@ export class AuthController {
 			userData.accessToken,
 			{
 				maxAge: 7 * 24 * 60 * 60 * 1000,
-				httpOnly: true,
+				httpOnly: !eval(process.env.HTTPS),
 				secure: eval(process.env.HTTPS)
 			}
 		)
@@ -122,7 +122,7 @@ export class AuthController {
 			refreshToken,
 			{
 				maxAge: 30 * 24 * 60 * 60 * 1000,
-				httpOnly: true,
+				httpOnly: !eval(process.env.HTTPS),
 				secure: eval(process.env.HTTPS)
 			}
 		).cookie(
@@ -130,7 +130,7 @@ export class AuthController {
 			userData.accessToken,
 			{
 				maxAge: 7 * 24 * 60 * 60 * 1000,
-				httpOnly: true,
+				httpOnly: !eval(process.env.HTTPS),
 				secure: eval(process.env.HTTPS)
 			}
 		).json(userData)
