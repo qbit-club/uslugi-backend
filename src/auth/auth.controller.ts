@@ -34,7 +34,16 @@ export class AuthController {
 				httpOnly: !eval(process.env.HTTPS),
 				secure: eval(process.env.HTTPS)
 			}
-		).json(userData)
+		).cookie(
+			'token',
+			userData.accessToken,
+			{
+				maxAge: 7 * 24 * 60 * 60 * 1000,
+				httpOnly: !eval(process.env.HTTPS),
+				secure: eval(process.env.HTTPS)
+			}
+		)
+		.json(userData)
 	}
 
 	@HttpCode(HttpStatus.OK)
@@ -57,7 +66,16 @@ export class AuthController {
 				httpOnly: !eval(process.env.HTTPS),
 				secure: eval(process.env.HTTPS)
 			}
-		).json(userData)
+		).cookie(
+			'token',
+			userData.accessToken,
+			{
+				maxAge: 7 * 24 * 60 * 60 * 1000,
+				httpOnly: !eval(process.env.HTTPS),
+				secure: eval(process.env.HTTPS)
+			}
+		)
+		.json(userData)
 	}
 
 	@HttpCode(HttpStatus.OK)
