@@ -6,8 +6,7 @@ import { HttpExceptionFilter } from './exceptions/http-exception.filter';
 
 // Load environment variables at the very beginning
 
-const cookieParser = require('cookie-parser');
-
+import * as cookieParser from 'cookie-parser';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
