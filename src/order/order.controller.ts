@@ -43,10 +43,10 @@ export class OrderController {
             $push: { orders: orderFromDb._id },
         });
 
-        let mailRes = await this.mailService.sendOrderNotifications(
-            restFromDb.mailTo.order,
-            orderFromDb,
-        );
+        // let mailRes = await this.mailService.sendOrderNotifications(
+        //     restFromDb.mailTo.order,
+        //     orderFromDb,
+        // );
 
         const userUpdate = order.user?._id
             ? await this.UserModel.findByIdAndUpdate(
