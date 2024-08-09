@@ -100,7 +100,11 @@ export class RestController {
   @Post('one-by-alias')
   async oneByAlias(@Body('alias') alias: string) {
     let restFromDb = await this.RestModel.findOne({ alias })
-    if (restFromDb) return restFromDb.populateMenu();
+    if (restFromDb) {
+      console.log(restFromDb.populateMenu());
+      
+      return restFromDb.populateMenu();
+    } 
     return {}
   }
   @Get('by-id')
