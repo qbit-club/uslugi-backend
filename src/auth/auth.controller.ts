@@ -32,7 +32,8 @@ export class AuthController {
 			{
 				maxAge: 30 * 24 * 60 * 60 * 1000,
 				httpOnly: !eval(process.env.HTTPS),
-				secure: eval(process.env.HTTPS)
+				secure: eval(process.env.HTTPS),
+				domain: process.env?.DOMAIN ?? ''
 			}
 		).cookie(
 			'token',
@@ -40,7 +41,8 @@ export class AuthController {
 			{
 				maxAge: 7 * 24 * 60 * 60 * 1000,
 				httpOnly: !eval(process.env.HTTPS),
-				secure: eval(process.env.HTTPS)
+				secure: eval(process.env.HTTPS),
+				domain: process.env?.DOMAIN ?? ''
 			}
 		)
 		.json(userData)
@@ -64,7 +66,8 @@ export class AuthController {
 			{
 				maxAge: 30 * 24 * 60 * 60 * 1000,
 				httpOnly: !eval(process.env.HTTPS),
-				secure: eval(process.env.HTTPS)
+				secure: eval(process.env.HTTPS),
+				domain: process.env?.DOMAIN ?? ''
 			}
 		).cookie(
 			'token',
@@ -72,7 +75,8 @@ export class AuthController {
 			{
 				maxAge: 7 * 24 * 60 * 60 * 1000,
 				httpOnly: !eval(process.env.HTTPS),
-				secure: eval(process.env.HTTPS)
+				secure: eval(process.env.HTTPS),
+				domain: process.env?.DOMAIN ?? ''
 			}
 		)
 		.json(userData)
@@ -96,7 +100,8 @@ export class AuthController {
 			{
 				maxAge: 30 * 24 * 60 * 60 * 1000,
 				httpOnly: !eval(process.env.HTTPS),
-				secure: eval(process.env.HTTPS)
+				secure: eval(process.env.HTTPS),
+				domain: process.env?.DOMAIN ?? ''
 			}
 		)		
 		res.cookie(
@@ -105,7 +110,8 @@ export class AuthController {
 			{
 				maxAge: 7 * 24 * 60 * 60 * 1000,
 				httpOnly: !eval(process.env.HTTPS),
-				secure: eval(process.env.HTTPS)
+				secure: eval(process.env.HTTPS),
+				domain: process.env?.DOMAIN ?? ''
 			}
 		)
 		res.json(userData.user)
@@ -141,7 +147,8 @@ export class AuthController {
 			{
 				maxAge: 30 * 24 * 60 * 60 * 1000,
 				httpOnly: !eval(process.env.HTTPS),
-				secure: eval(process.env.HTTPS)
+				secure: eval(process.env.HTTPS),
+				domain: process.env?.DOMAIN ?? ''
 			}
 		).cookie(
 			'token',
@@ -149,7 +156,8 @@ export class AuthController {
 			{
 				maxAge: 7 * 24 * 60 * 60 * 1000,
 				httpOnly: !eval(process.env.HTTPS),
-				secure: eval(process.env.HTTPS)
+				secure: eval(process.env.HTTPS),
+				domain: process.env?.DOMAIN ?? ''
 			}
 		).json(userData)
 	}

@@ -103,7 +103,11 @@ export class RestController {
 
   @Post('one-by-alias')
   async oneByAlias(@Body('alias') alias: string) {
-    return (await this.RestModel.findOne({ alias })).populateMenu();
+    let restFromDb = await this.RestModel.findOne({ alias })
+    if (restFromDb) {      
+      return restFromDb.populateMenu();
+    } 
+    return {}
   }
   @Get('by-id')
   async getById(@Query('_id') _id: string) {
