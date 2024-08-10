@@ -167,6 +167,7 @@ export class UserController {
     @Body('userId') userId: string,
     @Body('restId') restId: string,
   ) {
+  
     if (!restId) return { user: await this.UserModel.findById(userId) }
 
     return {
