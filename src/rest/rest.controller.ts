@@ -185,7 +185,7 @@ export class RestController {
       ...foodListItem,
       _id: new mongoose.Types.ObjectId(),
     };
-    console.log(newFoodListItem);
+
     return await this.RestModel.findByIdAndUpdate(
       restId,
       { $push: { foodList: newFoodListItem } },
