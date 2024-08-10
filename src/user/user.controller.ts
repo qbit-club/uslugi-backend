@@ -186,7 +186,8 @@ export class UserController {
   ) {
     let userFromDb = await this.UserModel.findById(userId).populate({
       path: 'managerIn',
-      select: ['title', 'isHidden']
+      select: ['title', 'isHidden'],
+      match: { deleted: { $ne: true } }
     })
 
     return userFromDb.managerIn

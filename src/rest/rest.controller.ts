@@ -66,7 +66,7 @@ export class RestController {
   }
   @Get('rests-name')
   async getRestsName() {
-    let x = await this.RestModel.find({}, { title: 1, managers: 1 });
+    let x = await this.RestModel.find({ deleted: false }, { title: 1, managers: 1 });
     return x;
   }
 
