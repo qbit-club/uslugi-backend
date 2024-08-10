@@ -39,7 +39,7 @@ export class RestController {
     private RestService: RestService,
     @InjectModel('Rest') private RestModel: Model<RestClass>,
     @InjectModel('User') private UserModel: Model<UserClass>,
-  ) { }
+  ) {}
   @Post()
   async create(@Body('rest') rest: RestFromClient) {
     const restCallback = await this.RestModel.create(rest);
@@ -58,16 +58,16 @@ export class RestController {
   }
   @Get('all')
   async getAll() {
-    return await this.RestModel.find({ isHidden:false });
+    return await this.RestModel.find({ isHidden: false, deleted: false });
   }
   @Get('all-with-hidden')
   async getAllWithHidden() {
-    return await this.RestModel.find({});
+    return await this.RestModel.find({ deleted: false });
   }
   @Get('rests-name')
   async getRestsName() {
     let x = await this.RestModel.find({}, { title: 1, managers: 1 });
-    return x
+    return x;
   }
 
   // @HttpCode(HttpStatus.OK)
@@ -90,24 +90,26 @@ export class RestController {
       { rests: restId },
       { $pull: { rests: restId } },
     );
-    return await this.RestModel.findByIdAndDelete(restId);
+    return await this.RestModel.findByIdAndUpdate(restId, {
+      $set: { deleted: true },
+    });
   }
   @Put('change-hide')
   async hideRest(@Query('rest_id') restId: string) {
     return await this.RestModel.updateOne(
-      { "_id": restId },
-      [{ "$set": { isHidden: { "$not": "$isHidden" } } }],
-      { runValidators: true }
+      { _id: restId },
+      [{ $set: { isHidden: { $not: '$isHidden' } } }],
+      { runValidators: true },
     );
   }
 
   @Post('one-by-alias')
   async oneByAlias(@Body('alias') alias: string) {
-    let restFromDb = await this.RestModel.findOne({ alias })
-    if (restFromDb) {      
+    let restFromDb = await this.RestModel.findOne({ alias });
+    if (restFromDb) {
       return restFromDb.populateMenu();
-    } 
-    return {}
+    }
+    return {};
   }
   @Get('by-id')
   async getById(@Query('_id') _id: string) {
@@ -129,10 +131,12 @@ export class RestController {
 
     for (let file of files) {
       if (file.originalname.startsWith('logo')) {
-        file.buffer = await sharp(file.buffer).resize(300, 300).toBuffer()
+        file.buffer = await sharp(file.buffer).resize(300, 300).toBuffer();
       }
       if (file.originalname.startsWith('headerimage')) {
-        file.buffer = await sharp(file.buffer).resize({ width: 1800, withoutEnlargement: true }).toBuffer()
+        file.buffer = await sharp(file.buffer)
+          .resize({ width: 1800, withoutEnlargement: true })
+          .toBuffer();
       }
       let uploadResult = await YaCloud.Upload({
         file,
@@ -158,18 +162,17 @@ export class RestController {
     @Body('meal') meal: FoodListItemFromDb,
   ) {
     await this.RestModel.updateOne(
-      { "_id": restId, "foodList._id": mealId },
+      { _id: restId, 'foodList._id': mealId },
       { $set: { 'foodList.$': meal } },
-      { runValidators: true }
-    )
-    return await this.RestModel.findById({ "_id": restId })
+      { runValidators: true },
+    );
+    return await this.RestModel.findById({ _id: restId });
   }
   @Post('/menu')
   async addToMenu(
     @Body('foodListItemId') foodListItemId: string,
     @Body('restId') restId: string,
   ) {
-
     return await this.RestModel.findByIdAndUpdate(
       restId,
       { $addToSet: { menu: foodListItemId } },
@@ -203,7 +206,7 @@ export class RestController {
     let filenames = [];
 
     for (let file of files) {
-      file.buffer = await sharp(file.buffer).resize(400, 400).toBuffer()
+      file.buffer = await sharp(file.buffer).resize(400, 400).toBuffer();
       let uploadResult = await YaCloud.Upload({
         file,
         path: 'restaurants',
@@ -221,7 +224,6 @@ export class RestController {
     restFromDb.markModified('foodList');
     return await restFromDb.save();
   }
-
 
   // @Post('move-food-list-item-to-menu')
   // async moveFoodItemToMenu(
@@ -263,45 +265,45 @@ export class RestController {
     );
     let res = await this.RestModel.findByIdAndUpdate(
       restId,
-      { $pull: { "foodList": { "_id": new mongoose.Types.ObjectId(mealId) } } },
+      { $pull: { foodList: { _id: new mongoose.Types.ObjectId(mealId) } } },
       { new: true },
     );
-    return res
+    return res;
   }
 
   @Put('add-email')
   async addEmail(
     @Body('email') email: string,
     @Body('mailType') mailType: string,
-    @Body('restId') restId: string
+    @Body('restId') restId: string,
   ) {
     let restFromDb = await this.RestModel.findById(restId);
 
     if (restFromDb.mailTo[mailType].includes(email)) {
       throw ApiError.BadRequest(`${email} уже в списке`);
     }
-    restFromDb.mailTo[mailType].push(email)
+    restFromDb.mailTo[mailType].push(email);
     restFromDb.markModified('mailTo');
 
-    return await restFromDb.save()
+    return await restFromDb.save();
   }
 
   @Put('delete-email')
   async deleteEmail(
     @Body('email') email: string,
     @Body('mailType') mailType: string,
-    @Body('restId') restId: string
+    @Body('restId') restId: string,
   ) {
     let restFromDb = await this.RestModel.findById(restId);
-    
+
     for (let i = 0; i < restFromDb.mailTo[mailType].length; i++) {
       if (restFromDb.mailTo[mailType][i] == email) {
-        restFromDb.mailTo[mailType].splice(i, 1)
+        restFromDb.mailTo[mailType].splice(i, 1);
         break;
       }
     }
 
     restFromDb.markModified('mailTo');
-    return await restFromDb.save()
+    return await restFromDb.save();
   }
 }

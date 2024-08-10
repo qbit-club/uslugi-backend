@@ -12,4 +12,5 @@ export interface RestFromClient {
   schedule: string
   managers?:string[]
   isHidden?: Boolean
+  deleted?: Boolean
 }

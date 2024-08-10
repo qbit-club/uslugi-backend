@@ -120,6 +120,13 @@ export class RestClass {
   isHidden: false;
 
   @Prop({
+    type: Boolean,
+    required: false,
+    default: false,
+  })
+  deleted: false;
+  
+  @Prop({
     type: Object,
     required: false,
     default: {
