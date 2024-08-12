@@ -58,7 +58,7 @@ export class RestController {
   }
   @Get('all')
   async getAll() {
-    return await this.RestModel.find({ isHidden:false });
+    return await this.RestModel.find({ isHidden: false });
   }
   @Get('all-with-hidden')
   async getAllWithHidden() {
@@ -92,21 +92,13 @@ export class RestController {
     );
     return await this.RestModel.findByIdAndDelete(restId);
   }
-  @Put('change-hide')
-  async hideRest(@Query('rest_id') restId: string) {
-    return await this.RestModel.updateOne(
-      { "_id": restId },
-      [{ "$set": { isHidden: { "$not": "$isHidden" } } }],
-      { runValidators: true }
-    );
-  }
 
   @Post('one-by-alias')
   async oneByAlias(@Body('alias') alias: string) {
     let restFromDb = await this.RestModel.findOne({ alias })
-    if (restFromDb) {      
+    if (restFromDb) {
       return restFromDb.populateMenu();
-    } 
+    }
     return {}
   }
   @Get('by-id')
@@ -293,7 +285,7 @@ export class RestController {
     @Body('restId') restId: string
   ) {
     let restFromDb = await this.RestModel.findById(restId);
-    
+
     for (let i = 0; i < restFromDb.mailTo[mailType].length; i++) {
       if (restFromDb.mailTo[mailType][i] == email) {
         restFromDb.mailTo[mailType].splice(i, 1)
@@ -303,5 +295,13 @@ export class RestController {
 
     restFromDb.markModified('mailTo');
     return await restFromDb.save()
+  }
+
+  @Put('hide')
+  async hideRest(
+    @Body('_id') _id: string,
+    @Body('isHiddenToSet') isHiddenToSet: boolean
+  ) {
+    return await this.RestModel.findByIdAndUpdate(_id, { isHidden: isHiddenToSet }, { new: true })
   }
 }
