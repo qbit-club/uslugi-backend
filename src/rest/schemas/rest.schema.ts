@@ -115,9 +115,10 @@ export class RestClass {
 
   @Prop({
     type: Boolean,
-    required: false
+    required: false,
+    default: true
   })
-  isHidden: false;
+  isHidden: boolean;
 
   @Prop({
     type: Boolean,
