@@ -62,11 +62,11 @@ export class RestController {
   }
   @Get('all-with-hidden')
   async getAllWithHidden() {
-    return await this.RestModel.find({});
+    return await this.RestModel.find({ deleted: false });
   }
   @Get('rests-name')
   async getRestsName() {
-    let x = await this.RestModel.find({}, { title: 1, managers: 1 });
+    let x = await this.RestModel.find({ deleted: false }, { title: 1, managers: 1 });
     return x
   }
 
@@ -90,7 +90,9 @@ export class RestController {
       { rests: restId },
       { $pull: { rests: restId } },
     );
-    return await this.RestModel.findByIdAndDelete(restId);
+    return await this.RestModel.findByIdAndUpdate(restId, {
+      $set: { deleted: true },
+    });
   }
 
   @Post('one-by-alias')

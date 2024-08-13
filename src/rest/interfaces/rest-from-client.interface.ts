@@ -2,6 +2,7 @@ import type { Table } from "./table.interface";
 
 export interface RestFromClient {
   title: string
+  type: string
   alias: string
   phone: string
   socialMedia: string
