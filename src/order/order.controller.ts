@@ -123,6 +123,51 @@ export class OrderController {
     return ordersFromDb;
   }
 
+  @Post('user-orders')
+  async getUserOrders(
+    @Body('userId') userId: string,
+    @Body('page') page: number,
+  ) {
+    let limitNumber = 50;
+    let userFromDb = await this.UserModel.findById(userId).populate({
+      path: 'orders',
+      populate: {
+        path: 'rest',
+        select: ['title'],
+      },
+      options: {
+        sort: { date: -1 },
+        limit: limitNumber * page,
+      },
+    });
+
+    const orders: any = userFromDb.orders;
+
+    const grouped: { [key: string]: any[] } = {};
+    orders.forEach((order) => {
+      const rest = order.rest.title || 'Без названия';
+      if (!grouped[rest]) {
+        grouped[rest] = [];
+      }
+      grouped[rest].push(order);
+    });
+
+    const groupedOrders = Object.keys(grouped).map((rest) => ({
+      rest,
+      orders: grouped[rest],
+    }));
+
+    let orderCount = 0;
+    for (let group of groupedOrders) {
+      orderCount += group.orders.length;
+    }
+
+    return {
+      orders: groupedOrders,
+      hasMoreOrders: orderCount >= page * limitNumber,
+    };
+  }
+
   @Put('status')
   async changeStatus(
     @Body('orderId') orderId: string,
