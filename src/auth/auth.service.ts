@@ -119,7 +119,6 @@ export class AuthService {
     let secret = process.env.JWT_RESET_SECRET + candidate.password
     
     let result = this.TokenService.validateResetToken(token, secret)
-  console.log(result);
   
     if (!result) throw ApiError.AccessDenied()
 
