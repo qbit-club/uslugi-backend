@@ -12,10 +12,17 @@ export class RestClass {
   @Prop({
     type: String,
     required: true,
-    min: 4,
+    min: 2,
     max: 32,
   })
   title: string;
+  @Prop({
+    type: String,
+    required: false,
+    min: 3,
+    max: 32,
+  })
+  type: string;
 
   @Prop({
     type: String,
