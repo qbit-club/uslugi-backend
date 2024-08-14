@@ -30,6 +30,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { RestClass } from './schemas/rest.schema';
 import { UserClass } from 'src/user/schemas/user.schema';
+import { RestRatingClass } from './schemas/rest-rating.schema'
 import * as mongoose from 'mongoose';
 import { FoodListItemFromDb } from './interfaces/food-list-item-from-db.interface';
 
@@ -39,6 +40,7 @@ export class RestController {
     private RestService: RestService,
     @InjectModel('Rest') private RestModel: Model<RestClass>,
     @InjectModel('User') private UserModel: Model<UserClass>,
+    @InjectModel('RestRating') private RestRatingModel: Model<RestRatingClass>,
   ) { }
   @Post()
   async create(@Body('rest') rest: RestFromClient) {
@@ -304,6 +306,15 @@ export class RestController {
     @Body('_id') _id: string,
     @Body('isHiddenToSet') isHiddenToSet: boolean
   ) {
-    return await this.RestModel.findByIdAndUpdate(_id, { isHidden: isHiddenToSet }, {new: true})
+    return await this.RestModel.findByIdAndUpdate(_id, { isHidden: isHiddenToSet }, { new: true })
+  }
+
+  @Post('set-rating')
+  async setRestRating(
+    @Body('rating') rating: number,
+    @Body('userId') userId: string,
+    @Body('restId') restId: string
+  ) {
+    return await this.RestService.setRestRating(rating, restId, userId)
   }
 }

@@ -10,6 +10,7 @@ import {
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { MailService } from '../mail/mail.service';
+import { RestService } from 'src/rest/rest.service';
 
 // types
 import type { Order } from './interfaces/order.interface';
@@ -22,17 +23,17 @@ import * as mongoose from 'mongoose';
 import { UserClass } from 'src/user/schemas/user.schema';
 import { RestClass } from 'src/rest/schemas/rest.schema';
 import { OrderFromDb } from './interfaces/order-from-db.interface';
-import { int } from 'aws-sdk/clients/datapipeline';
 
 @Controller('order')
 export class OrderController {
   constructor(
     private readonly orderService: OrderService,
     private readonly mailService: MailService,
+    private readonly restService: RestService,
     @InjectModel('Order') private OrderModel: Model<OrderClass>,
     @InjectModel('User') private UserModel: Model<UserClass>,
     @InjectModel('Rest') private RestModel: Model<RestClass>,
-  ) {}
+  ) { }
 
   @Post()
   async create(@Body('order') order: Order) {
@@ -54,10 +55,10 @@ export class OrderController {
 
       const userUpdate = order.user?._id
         ? await this.UserModel.findByIdAndUpdate(
-            order.user?._id,
-            { $push: { orders: orderFromDb._id } },
-            { new: true },
-          )
+          order.user?._id,
+          { $push: { orders: orderFromDb._id } },
+          { new: true },
+        )
         : order.user;
 
       return {
@@ -105,7 +106,7 @@ export class OrderController {
     @Query('rest_id') restId: string,
     @Query('page') page: string = '1',
   ) {
-    let limitNumber: int = 30;
+    let limitNumber = 30;
     const pageNumber = parseInt(page, 10);
 
     // Вычисляем, сколько записей нужно пропустить
@@ -143,28 +144,41 @@ export class OrderController {
 
     const orders: any = userFromDb.orders;
 
-    const grouped: { [key: string]: any[] } = {};
-    orders.forEach((order) => {
-      const rest = order.rest.title || 'Без названия';
-      if (!grouped[rest]) {
-        grouped[rest] = [];
+    // сделал более понятную структуру
+    let grouped: {
+      rest: string, // название ресторана
+      rating: number, // рейтинг ресторана, полученный для конкретного пользователя
+      restId: string, // чтобы не было непоняток при поиске ресторана
+      orders: any[]
+    }[] = [];
+
+    for (let order of orders) {
+      // найдём ресторан в наших группах
+      let foundRestIndex = -1;
+      for (let i = 0; i < grouped.length; i++) {
+        if (grouped[i].restId == order.rest._id) {
+          foundRestIndex = i;
+          break;
+        }
       }
-      grouped[rest].push(order);
-    });
-
-    const groupedOrders = Object.keys(grouped).map((rest) => ({
-      rest,
-      orders: grouped[rest],
-    }));
-
-    let orderCount = 0;
-    for (let group of groupedOrders) {
-      orderCount += group.orders.length;
+      // если ресторан не нашёлся - добавляем этот ресторан и текущий заказ к нему
+      if (foundRestIndex < 0) {
+        grouped.push({
+          rest: order.rest.title || 'Без названия',
+          restId: order.rest._id,
+          // получаем рейтинг ресторана у конкретного пользователя
+          rating: await this.restService.getRestRating(order.rest._id, userId),
+          orders: [order]
+        })
+      } else {
+        // если ресторан нашёлся - тут всё просто, для этого и делали поиск его индекса
+        grouped[foundRestIndex].orders.push(order)
+      }
     }
 
     return {
-      orders: groupedOrders,
-      hasMoreOrders: orderCount >= page * limitNumber,
+      orders: grouped,
+      hasMoreOrders: orders.length >= page * limitNumber,
     };
   }
 
