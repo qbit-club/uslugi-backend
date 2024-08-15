@@ -121,4 +121,50 @@ export class RestService {
 
     return await restRatingFromDb.save()
   }
+
+  /**
+   * 
+   * @param restId 
+   * @returns string in format .1 of actual rating
+   */
+  async getRestSummaryRating(restId: string) {
+    let restRatingFromDb = await this.RestRatingModel.findOne({ rest: restId })
+    if (!restRatingFromDb) {
+      restRatingFromDb = await this.RestRatingModel.create({
+        rest: restId,
+        ratings: [
+          {
+            rating: 1,
+            users: []
+          },
+          {
+            rating: 2,
+            users: []
+          },
+          {
+            rating: 3,
+            users: []
+          },
+          {
+            rating: 4,
+            users: []
+          },
+          {
+            rating: 5,
+            users: []
+          },
+        ]
+      })
+    }
+    let summ = 0
+    let count = 0
+    for (let rItem of restRatingFromDb.ratings) {
+      summ += rItem.rating * rItem.users.length
+      count += rItem.users.length
+    }
+    
+    if (summ == 0) return 0
+
+    return (summ / count).toFixed(1)
+  }
 }

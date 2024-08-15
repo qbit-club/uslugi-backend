@@ -13,6 +13,7 @@ import {
   Query,
   UploadedFiles,
   UseInterceptors,
+  Response,
 } from '@nestjs/common';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import ApiError from 'src/exceptions/errors/api-error';
@@ -59,8 +60,27 @@ export class RestController {
     return { _id: restId };
   }
   @Get('all')
-  async getAll() {
-    return await this.RestModel.find({ isHidden: false, deleted: false });
+  async getAll(
+    @Response() res
+  ) {
+    let restsFromDb = await this.RestModel.find({ isHidden: false, deleted: false });
+    // console.log(restsFromDb[0]);
+
+    let toReturn = []
+
+    for (let rest of restsFromDb) {
+      // эти фокусы нужны, потому что при ...rest появлется _doc
+      let tmpRest: any = Object.assign({}, { ...rest })
+
+      let toPush = {
+        ...tmpRest._doc,
+        rating: await this.RestService.getRestSummaryRating(rest._id.toString())
+      }
+
+      toReturn.push(toPush)
+    }
+
+    return res.json(toReturn)
   }
   @Get('all-with-hidden')
   async getAllWithHidden() {
