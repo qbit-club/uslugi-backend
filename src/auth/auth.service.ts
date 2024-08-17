@@ -41,7 +41,7 @@ export class AuthService {
   }
 
   async login(email: string, password: string) {
-    const user = (await this.UserModel.findOne({ email })).toObject()
+    const user = await this.UserModel.findOne({ email })
 
     if (!user) {
       throw ApiError.BadRequest('Пользователь с таким email не найден')
