@@ -6,6 +6,7 @@ import { User } from 'src/user/interfaces/user.interface';
 import { AuthGuard } from './auth.guard';
 import { AuthService } from './auth.service';
 import { MailService } from 'src/mail/mail.service';
+import { Throttle } from '@nestjs/throttler';
 
 @Controller('auth')
 export class AuthController {
@@ -14,6 +15,13 @@ export class AuthController {
 		private mailService: MailService
 	) { }
 
+	@Throttle({
+    default: {
+      ttl: 60000,
+      limit: 4,
+      blockDuration: 5 * 60000
+    }
+  })
 	@HttpCode(HttpStatus.CREATED)
 	@Post('registration')
 	async registration(
@@ -47,7 +55,13 @@ export class AuthController {
 		)
 		.json(userData)
 	}
-
+	@Throttle({
+    default: {
+      ttl: 60000,
+      limit: 5,
+      blockDuration: 5 * 60000
+    }
+  })
 	@HttpCode(HttpStatus.OK)
 	@Post('login')
 	async login(
@@ -129,6 +143,13 @@ export class AuthController {
 		res.clearCookie('refreshToken').clearCookie('token').send()
 	}
 
+	@Throttle({
+    default: {
+      ttl: 60000,
+      limit: 4,
+      blockDuration: 5 * 60000
+    }
+  })
 	@Post('reset-password')
 	async resetPassword(
 		@Res() res: Response,

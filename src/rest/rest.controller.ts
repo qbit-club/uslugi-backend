@@ -17,6 +17,7 @@ import {
 } from '@nestjs/common';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import ApiError from 'src/exceptions/errors/api-error';
+import { Throttle } from '@nestjs/throttler';
 
 // interfaces
 import type { RestFromClient } from './interfaces/rest-from-client.interface';
@@ -43,6 +44,13 @@ export class RestController {
     @InjectModel('User') private UserModel: Model<UserClass>,
     @InjectModel('RestRating') private RestRatingModel: Model<RestRatingClass>,
   ) { }
+  @Throttle({
+    default: {
+      ttl: 60000,
+      limit: 3,
+      blockDuration: 5 * 60000
+    }
+  })
   @Post()
   async create(@Body('rest') rest: RestFromClient) {
     const restCallback = await this.RestModel.create(rest);
@@ -192,6 +200,13 @@ export class RestController {
       { new: true },
     );
   }
+  @Throttle({
+    default: {
+      ttl: 60000,
+      limit: 5,
+      blockDuration: 5 * 60000
+    }
+  })
   @Post('food-list')
   async createFoodListItem(
     @Body('foodListItem') foodListItem: FoodListItem,
@@ -328,7 +343,13 @@ export class RestController {
   ) {
     return await this.RestModel.findByIdAndUpdate(_id, { isHidden: isHiddenToSet }, { new: true })
   }
-
+  @Throttle({
+    default: {
+      ttl: 60000,
+      limit: 8,
+      blockDuration: 5 * 60000
+    }
+  })
   @Post('set-rating')
   async setRestRating(
     @Body('rating') rating: number,

@@ -13,6 +13,10 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     if (exception.getStatus() === 500)
       return res.status(500).json({ message: 'Непредвиденная ошибка' })
+
+    if (exception.getStatus() === 429) {
+      return res.status(429).json({ message: 'Слишком много запросов. Вы заблокированы на 5 минут!' })
+    }
    
     if (exception instanceof ApiError)
       return res.status(exception.error_code).json({ message: exception.message })
