@@ -107,6 +107,7 @@ export class UserController {
         { email: user_email },
         {
           $addToSet: { managerIn: chosen_rest },
+          $set: { managingRest: chosen_rest }
         },
       );
     } else {
@@ -134,7 +135,7 @@ export class UserController {
   ) {
     await this.UserModel.updateOne(
       { email: manager_email, 'roles': 'manager' },
-      { $pull: { 'managerIn': restId } },
+      { $pull: { 'managerIn': restId, 'roles': 'manager' }, $unset: { managingRest: "" } },
     );
     return this.RestModel.updateOne(
       { _id: restId },
